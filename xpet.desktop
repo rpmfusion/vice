@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=XPET (Vice)
+Comment=A Commodore PET Emulator
+Exec=xpet
+Icon=pet.png
+Terminal=false
+StartupNotify=true
+Type=Application
+Categories=Game;Emulator;

@@ -1,0 +1,11 @@
+--- vice-1.21/src/arch/unix/x11/ui-resources.c.htmlview	2007-03-03 10:07:37.000000000 +0100
++++ vice-1.21/src/arch/unix/x11/ui-resources.c	2007-03-10 14:44:58.000000000 +0100
+@@ -112,7 +112,7 @@
+ #ifdef MACOSX_SUPPORT    
+       "/usr/bin/open %s",
+ #else
+-      "netscape %s",
++      "htmlview %s",
+ #endif
+       RES_EVENT_NO, NULL,
+       &ui_resources.html_browser_command,

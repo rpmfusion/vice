@@ -1,0 +1,34 @@
+--- vice-1.19/src/arch/unix/archdep.h~	2006-06-20 21:46:38.000000000 +0200
++++ vice-1.19/src/arch/unix/archdep.h	2006-06-20 21:46:38.000000000 +0200
+@@ -106,7 +106,7 @@
+ extern const char *archdep_home_path(void);
+ 
+ /* Define the default system directory (where the ROMs are).  */
+-#ifdef __NetBSD__
++#if 1
+ #define LIBDIR          PREFIX "/share/vice"
+ #else
+ #define LIBDIR          PREFIX "/lib/vice"
+--- vice-1.19/src/arch/unix/x11/gnome/x11ui.c~	2006-06-20 21:47:10.000000000 +0200
++++ vice-1.19/src/arch/unix/x11/gnome/x11ui.c	2006-06-20 21:47:10.000000000 +0200
+@@ -420,9 +420,9 @@
+ 		       GNOME_PARAM_POPT_TABLE, NULL, NULL);
+ 
+     /* set X11 fontpath */
+-    if (access(PREFIX "/lib/vice/fonts/fonts.dir", R_OK) == 0)
++    if (access(PREFIX "/share/vice/fonts/fonts.dir", R_OK) == 0)
+     {
+-	const char *cmd = "xset fp+ " PREFIX "/lib/vice/fonts";
++	const char *cmd = "xset fp+ " PREFIX "/share/vice/fonts";
+ 	
+ 	if (system(cmd) != 0)
+ 	    fprintf(stderr, _("Can't add fontpath `%s'.\n"), cmd);
+@@ -1404,7 +1404,7 @@
+ 	ui_dispatch_events();
+ 
+ 	/* remove fontpath, Don't care about result */
+-	system("xset fp- " PREFIX "/lib/vice/fonts");
++	system("xset fp- " PREFIX "/share/vice/fonts");
+ 
+         lib_free(s);	
+ 	exit(0);

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=XVic (Vice)
+Comment=A Commodore VIC-20 Emulator
+Exec=xvic
+Icon=vic20.png
+Terminal=false
+StartupNotify=true
+Type=Application
+Categories=Game;Emulator;
