@@ -1,0 +1,71 @@
+diff -ur vice-1.20.orig/src/arch/unix/console.c vice-1.20/src/arch/unix/console.c
+--- vice-1.20.orig/src/arch/unix/console.c	2006-07-10 18:09:33.000000000 +0200
++++ vice-1.20/src/arch/unix/console.c	2007-03-01 16:43:13.000000000 +0100
+@@ -115,6 +115,8 @@
+     char *p, *ret_sting;
+ 
+     p = readline(prompt);
++    if (!p)
++        return (char *)-1; /* special EOF "address" */
+ 
+     ret_sting = lib_stralloc(p);
+     free(p);
+diff -ur vice-1.20.orig/src/monitor/mon_util.c vice-1.20/src/monitor/mon_util.c
+--- vice-1.20.orig/src/monitor/mon_util.c	2006-08-06 17:54:56.000000000 +0200
++++ vice-1.20/src/monitor/mon_util.c	2007-03-01 16:48:42.000000000 +0100
+@@ -178,8 +178,8 @@
+ {
+     char *p = NULL;
+ 
+-    while (!p && !pchCommandLine) {
+-        /* as long as we don't have any return value... */
++    while (!p && !pchCommandLine && p != (char*)-1) {
++        /* as long as we don't have any return value and not EOF */
+ 
+         /* make sure to flush the output buffer */
+         mon_buffer_flush();
+@@ -187,6 +187,8 @@
+         /* get input from the user */
+         p = uimon_get_in(&pchCommandLine, prompt);
+     }
++    if (p == (char *)-1)
++        p = NULL;
+ 
+     if (pchCommandLine) {
+         /* we have an "artificially" generated command line */
+diff -ur vice-1.20.orig/src/monitor/monitor.c vice-1.20/src/monitor/monitor.c
+--- vice-1.20.orig/src/monitor/monitor.c	2005-04-21 01:45:23.000000000 +0200
++++ vice-1.20/src/monitor/monitor.c	2007-03-01 17:05:00.000000000 +0100
+@@ -1473,7 +1473,7 @@
+ {
+     mon_stop_output = 0;
+     if (cmd == NULL) {
+-        mon_out("\n");
++        exit_mon = 1;
+     } else {
+         if (!cmd[0]) {
+             if (!asm_mode) {
+@@ -1547,12 +1547,22 @@
+ 
+ void monitor_startup(void)
+ {
++    char *in;
+     char prompt[40];
++    int first_prompt = 1;
+ 
+     monitor_open();
+     while (!exit_mon) {
+         make_prompt(prompt);
+-        monitor_process(uimon_in(prompt));
++        in = uimon_in(prompt);
++        /* special case, if we get an EOF on the first prompt, assume
++           we do not have a valid stdin and complain about it */
++        if (first_prompt && in == NULL)
++            ui_error("Monitor exited due to EOF from console.\n"
++                "If you want to use the monitor start vice from a terminal!");
++        
++        monitor_process(in);
++        first_prompt = 0;
+     }
+     monitor_close(1);
+ }

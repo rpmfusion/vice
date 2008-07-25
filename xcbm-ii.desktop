@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=XCBM-II (Vice)
+Comment=A CBM-II (C610) Emulator
+Exec=xcbm2
+Icon=c610.png
+Terminal=false
+StartupNotify=true
+Type=Application
+Categories=Game;Emulator;

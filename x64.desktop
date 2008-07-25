@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=X64 (Vice)
+Comment=A Commodore 64 Emulator
+Exec=x64
+Icon=c64.png
+Terminal=false
+StartupNotify=true
+Type=Application
+Categories=Game;Emulator;
