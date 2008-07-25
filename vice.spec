@@ -1,6 +1,6 @@
 Name:           vice
 Version:        1.22
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPL
@@ -116,6 +116,12 @@ touch --no-create %{_datadir}/icons/hicolor || :
 
 
 %changelog
+* Fri Jul 25 2008 Hans de Goede <j.w.r.degoede@hhs.nl> 1.22-2
+- Release bump for rpmfusion
+
+* Mon Aug 13 2007 Hans de Goede <j.w.r.degoede@hhs.nl> 1.22-1
+- New upstream release 1.22
+
 * Wed Apr 25 2007 Hans de Goede <j.w.r.degoede@hhs.nl> 1.21-3%{?dist}
 - Further fixes to the xrand code to fix more crashes on exit (drb bz 87)
 
