@@ -1,8 +1,7 @@
-diff -up vice-1.22/src/arch/unix/archdep.h.foo vice-1.22/src/arch/unix/archdep.h
---- vice-1.22/src/arch/unix/archdep.h.foo	2007-04-29 20:50:17.000000000 +0200
-+++ vice-1.22/src/arch/unix/archdep.h	2008-07-25 21:49:40.000000000 +0200
-@@ -106,7 +106,7 @@
- extern const char *archdep_home_path(void);
+--- vice-2.0/src/arch/unix/archdep.h.foo	2008-07-07 20:23:10.000000000 +0200
++++ vice-2.0/src/arch/unix/archdep.h	2008-08-01 10:19:47.000000000 +0200
+@@ -109,7 +109,7 @@ extern const char *archdep_home_path(voi
+ extern const char *archdep_pref_path;
  
  /* Define the default system directory (where the ROMs are).  */
 -#ifdef __NetBSD__
@@ -10,27 +9,3 @@ diff -up vice-1.22/src/arch/unix/archdep.h.foo vice-1.22/src/arch/unix/archdep.h
  #define LIBDIR          PREFIX "/share/vice"
  #else
  #define LIBDIR          PREFIX "/lib/vice"
-diff -up vice-1.22/src/arch/unix/x11/gnome/x11ui.c.foo vice-1.22/src/arch/unix/x11/gnome/x11ui.c
---- vice-1.22/src/arch/unix/x11/gnome/x11ui.c.foo	2007-08-04 15:24:43.000000000 +0200
-+++ vice-1.22/src/arch/unix/x11/gnome/x11ui.c	2008-07-25 21:49:40.000000000 +0200
-@@ -424,9 +424,9 @@ void archdep_ui_init(int argc, char *arg
-     gtk_init(&fake_argc, &fake_args);
- 
-     /* set X11 fontpath */
--    if (access(PREFIX "/lib/vice/fonts/fonts.dir", R_OK) == 0)
-+    if (access(PREFIX "/share/vice/fonts/fonts.dir", R_OK) == 0)
-     {
--	const char *cmd = "xset fp+ " PREFIX "/lib/vice/fonts";
-+	const char *cmd = "xset fp+ " PREFIX "/share/vice/fonts";
- 	
- 	if (system(cmd) != 0)
- 	    fprintf(stderr, _("Can't add fontpath `%s'.\n"), cmd);
-@@ -1404,7 +1404,7 @@ void ui_exit(void)
- 	ui_dispatch_events();
- 
- 	/* remove fontpath, Don't care about result */
--	system("xset fp- " PREFIX "/lib/vice/fonts");
-+	system("xset fp- " PREFIX "/share/vice/fonts");
- 
-         lib_free(s);	
- 	exit(0);

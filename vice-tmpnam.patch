@@ -1,17 +1,18 @@
---- vice-1.20/src/arch/unix/archdep.c.tmpnam	2006-07-10 16:24:09.000000000 +0200
-+++ vice-1.20/src/arch/unix/archdep.c	2006-09-23 09:18:46.000000000 +0200
-@@ -373,36 +373,28 @@
- }
+diff -up vice-2.0/src/arch/unix/archdep.c.foobar vice-2.0/src/arch/unix/archdep.c
+--- vice-2.0/src/arch/unix/archdep.c.foobar	2008-07-07 20:23:10.000000000 +0200
++++ vice-2.0/src/arch/unix/archdep.c	2008-08-01 10:27:52.000000000 +0200
+@@ -416,37 +416,27 @@ char *archdep_quote_parameter(const char
  
  char *archdep_tmpnam(void)
--{
+ {
 -#ifdef GP2X
 -    static unsigned int tmp_string_counter=0;
 -    char tmp_string[32];
 -
 -    sprintf(tmp_string,"vice%d.tmp",tmp_string_counter++);
 -    return lib_stralloc(tmp_string);
--#elif HAVE_MKSTEMP
+-#else
+-#ifdef HAVE_MKSTEMP
 -    char *tmpName;
 -    const char mkstempTemplate[] = "/vice.XXXXXX";
 -    int fd;
@@ -21,7 +22,6 @@
 -    if ((tmp = getenv("TMPDIR")) != NULL ) {
 -        strncpy(tmpName, tmp, ioutil_maxpathlen());
 -        tmpName[ioutil_maxpathlen() - sizeof(mkstempTemplate)] = '\0';
-+{
 +    char *tmp, *name;
 +    
 +    name = util_concat(archdep_home_path(), "/.vice", NULL);
@@ -50,6 +50,7 @@
 +    return tmp;
  #else
 -    return lib_stralloc(tmpnam(NULL));
+-#endif
 +    name = lib_stralloc(tmp);
 +    free(tmp);
 +    return name;

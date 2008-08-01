@@ -1,11 +1,11 @@
 Name:           vice
-Version:        1.22
-Release:        2%{?dist}
+Version:        2.0
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPL
 URL:            http://www.viceteam.org/
-Source0:        http://www.viceteam.org/online/vice-%{version}.tar.gz
+Source0:        http://www.zimmers.net/anonftp/pub/cbm/crossplatform/emulators/VICE/vice-%{version}.tar.gz
 Source1:        x128.desktop
 Source2:        x64.desktop
 Source3:        xcbm-ii.desktop
@@ -116,6 +116,9 @@ touch --no-create %{_datadir}/icons/hicolor || :
 
 
 %changelog
+* Fri Aug  1 2008 Hans de Goede <j.w.r.degoede@hhs.nl> 2.0-1
+- New upstream release 2.0
+
 * Fri Jul 25 2008 Hans de Goede <j.w.r.degoede@hhs.nl> 1.22-2
 - Release bump for rpmfusion
 
