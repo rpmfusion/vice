@@ -1,6 +1,6 @@
 Name:           vice
-Version:        2.0
-Release:        2%{?dist}
+Version:        2.1
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPL
@@ -116,6 +116,9 @@ touch --no-create %{_datadir}/icons/hicolor || :
 
 
 %changelog
+* Sat Dec 27 2008 Hans de Goede <j.w.r.degoede@hhs.nl> 2.1-1
+- New upstream release 2.1
+
 * Wed Dec 17 2008 Hans de Goede <j.w.r.degoede@hhs.nl> 2.0-2
 - Replace htmlview requires with xdg-utils, as we have use xdg-open now
 
