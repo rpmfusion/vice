@@ -1,5 +1,5 @@
 Name:           vice
-Version:        2.0
+Version:        2.1
 Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
@@ -24,7 +24,7 @@ BuildRequires:  libXt-devel libXext-devel libXxf86vm-devel libXxf86dga-devel
 BuildRequires:  giflib-devel libjpeg-devel libgnomeui-devel ffmpeg-devel
 BuildRequires:  ncurses-devel readline-devel SDL-devel alsa-lib-devel
 BuildRequires:  bison flex gettext info desktop-file-utils xorg-x11-font-utils
-Requires:       hicolor-icon-theme htmlview
+Requires:       hicolor-icon-theme xdg-utils
 
 %description
 An emulator for a variety of Commodore 8bit machines, including the C16, C64,
@@ -116,6 +116,12 @@ touch --no-create %{_datadir}/icons/hicolor || :
 
 
 %changelog
+* Sat Dec 27 2008 Hans de Goede <j.w.r.degoede@hhs.nl> 2.1-1
+- New upstream release 2.1
+
+* Wed Dec 17 2008 Hans de Goede <j.w.r.degoede@hhs.nl> 2.0-2
+- Replace htmlview requires with xdg-utils, as we have use xdg-open now
+
 * Fri Aug  1 2008 Hans de Goede <j.w.r.degoede@hhs.nl> 2.0-1
 - New upstream release 2.0
 
