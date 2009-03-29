@@ -1,6 +1,6 @@
 Name:           vice
 Version:        2.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPL
@@ -116,6 +116,9 @@ touch --no-create %{_datadir}/icons/hicolor || :
 
 
 %changelog
+* Sun Mar 29 2009 Thorsten Leemhuis <fedora [AT] leemhuis [DOT] info> - 2.1-2
+- rebuild for new F11 features
+
 * Sat Dec 27 2008 Hans de Goede <j.w.r.degoede@hhs.nl> 2.1-1
 - New upstream release 2.1
 
