@@ -1,6 +1,6 @@
 Name:           vice
 Version:        2.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPL
@@ -19,6 +19,7 @@ Patch1:         vice-1.19-datadir.patch
 Patch2:         vice-htmlview.patch
 Patch3:         vice-tmpnam.patch
 Patch4:         vice-1.20-monitor-crash.patch
+Patch5:         vice-2.1-gcc44.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  libXt-devel libXext-devel libXxf86vm-devel libXxf86dga-devel
 BuildRequires:  giflib-devel libjpeg-devel libgnomeui-devel ffmpeg-devel
@@ -38,6 +39,7 @@ C128, VIC-20, PET (all models, except SuperPET 9000), Plus-4, CBM-II
 %patch2 -p1 -z .htmlview
 %patch3 -p1 -z .tmpnam
 %patch4 -p1 -z .mon
+%patch5 -p1
 for i in man/*.1 doc/*.info*; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
    mv $i.tmp $i
@@ -116,6 +118,9 @@ touch --no-create %{_datadir}/icons/hicolor || :
 
 
 %changelog
+* Wed Apr  1 2009 Hans de Goede <j.w.r.degoede@hhs.nl> 2.1-3
+- Fix building with gcc 4.4
+
 * Sun Mar 29 2009 Thorsten Leemhuis <fedora [AT] leemhuis [DOT] info> - 2.1-2
 - rebuild for new F11 features
 
