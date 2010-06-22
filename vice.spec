@@ -1,6 +1,6 @@
 Name:           vice
-Version:        2.1
-Release:        3%{?dist}
+Version:        2.2
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPL
@@ -19,11 +19,12 @@ Patch1:         vice-1.19-datadir.patch
 Patch2:         vice-htmlview.patch
 Patch3:         vice-tmpnam.patch
 Patch4:         vice-1.20-monitor-crash.patch
-Patch5:         vice-2.1-gcc44.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  libXt-devel libXext-devel libXxf86vm-devel libXxf86dga-devel
-BuildRequires:  giflib-devel libjpeg-devel libgnomeui-devel ffmpeg-devel
-BuildRequires:  ncurses-devel readline-devel SDL-devel alsa-lib-devel
+BuildRequires:  giflib-devel libjpeg-devel libpng-devel
+BuildRequires:  libgnomeui-devel gtkglext-devel
+BuildRequires:  ffmpeg-devel lame-devel
+BuildRequires:  readline-devel SDL-devel alsa-lib-devel
 BuildRequires:  bison flex gettext info desktop-file-utils xorg-x11-font-utils
 Requires:       hicolor-icon-theme xdg-utils
 
@@ -39,7 +40,6 @@ C128, VIC-20, PET (all models, except SuperPET 9000), Plus-4, CBM-II
 %patch2 -p1 -z .htmlview
 %patch3 -p1 -z .tmpnam
 %patch4 -p1 -z .mon
-%patch5 -p1
 for i in man/*.1 doc/*.info*; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
    mv $i.tmp $i
@@ -49,13 +49,30 @@ rm -f src/lib/*/*.c src/lib/*/*.h
 
 
 %build
-%configure --enable-gnomeui --enable-fullscreen --with-sdl
+%configure --enable-sdlui --without-esd
 make %{?_smp_mflags}
+pushd src
+  for i in x*; do
+    mv $i ../$i.sdl
+  done
+popd
+
+make distclean
+%configure --enable-gnomeui --enable-fullscreen --without-esd
+make %{?_smp_mflags} LD_FLAGS=-lX11
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT VICEDIR=%{_datadir}/%{name}
+for i in x*.sdl; do
+  install -p -m 755 $i $RPM_BUILD_ROOT%{_bindir}
+done
+pushd data
+  for i in */sdl_sym.vkm; do
+    cp -a --parents $i $RPM_BUILD_ROOT%{_datadir}/%{name}
+  done
+popd
 %find_lang %{name}
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 
@@ -118,6 +135,11 @@ touch --no-create %{_datadir}/icons/hicolor || :
 
 
 %changelog
+* Tue Jun 22 2010 Hans de Goede <j.w.r.degoede@hhs.nl> 2.2-1
+- New upstream release 2.2
+- Also build the new SDL version, the SDL binaries are available with a
+  .sdl extension, for example x64.sdl
+
 * Wed Apr  1 2009 Hans de Goede <j.w.r.degoede@hhs.nl> 2.1-3
 - Fix building with gcc 4.4
 

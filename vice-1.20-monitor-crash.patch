@@ -1,7 +1,7 @@
-diff -ur vice-1.20.orig/src/arch/unix/console.c vice-1.20/src/arch/unix/console.c
---- vice-1.20.orig/src/arch/unix/console.c	2006-07-10 18:09:33.000000000 +0200
-+++ vice-1.20/src/arch/unix/console.c	2007-03-01 16:43:13.000000000 +0100
-@@ -115,6 +115,8 @@
+diff -up vice-2.2/src/arch/unix/console.c.mon vice-2.2/src/arch/unix/console.c
+--- vice-2.2/src/arch/unix/console.c.mon	2009-10-21 18:46:46.000000000 +0200
++++ vice-2.2/src/arch/unix/console.c	2010-06-22 10:12:55.164882183 +0200
+@@ -114,6 +114,8 @@ char *console_in(console_t *log, const c
      char *p, *ret_sting;
  
      p = readline(prompt);
@@ -10,10 +10,10 @@ diff -ur vice-1.20.orig/src/arch/unix/console.c vice-1.20/src/arch/unix/console.
  
      ret_sting = lib_stralloc(p);
      free(p);
-diff -ur vice-1.20.orig/src/monitor/mon_util.c vice-1.20/src/monitor/mon_util.c
---- vice-1.20.orig/src/monitor/mon_util.c	2006-08-06 17:54:56.000000000 +0200
-+++ vice-1.20/src/monitor/mon_util.c	2007-03-01 16:48:42.000000000 +0100
-@@ -178,8 +178,8 @@
+diff -up vice-2.2/src/monitor/mon_util.c.mon vice-2.2/src/monitor/mon_util.c
+--- vice-2.2/src/monitor/mon_util.c.mon	2009-10-21 18:46:55.000000000 +0200
++++ vice-2.2/src/monitor/mon_util.c	2010-06-22 10:20:08.306259451 +0200
+@@ -210,8 +210,8 @@ char *uimon_in(const char *prompt)
  {
      char *p = NULL;
  
@@ -22,21 +22,21 @@ diff -ur vice-1.20.orig/src/monitor/mon_util.c vice-1.20/src/monitor/mon_util.c
 +    while (!p && !pchCommandLine && p != (char*)-1) {
 +        /* as long as we don't have any return value and not EOF */
  
-         /* make sure to flush the output buffer */
-         mon_buffer_flush();
-@@ -187,6 +187,8 @@
-         /* get input from the user */
-         p = uimon_get_in(&pchCommandLine, prompt);
+ #ifdef HAVE_NETWORK
+         if (monitor_is_remote()) {
+@@ -233,6 +233,8 @@ char *uimon_in(const char *prompt)
+         }
+ #endif
      }
 +    if (p == (char *)-1)
 +        p = NULL;
  
      if (pchCommandLine) {
          /* we have an "artificially" generated command line */
-diff -ur vice-1.20.orig/src/monitor/monitor.c vice-1.20/src/monitor/monitor.c
---- vice-1.20.orig/src/monitor/monitor.c	2005-04-21 01:45:23.000000000 +0200
-+++ vice-1.20/src/monitor/monitor.c	2007-03-01 17:05:00.000000000 +0100
-@@ -1473,7 +1473,7 @@
+diff -up vice-2.2/src/monitor/monitor.c.mon vice-2.2/src/monitor/monitor.c
+--- vice-2.2/src/monitor/monitor.c.mon	2009-11-09 20:05:30.000000000 +0100
++++ vice-2.2/src/monitor/monitor.c	2010-06-22 10:12:55.175883371 +0200
+@@ -2111,7 +2111,7 @@ static int monitor_process(char *cmd)
  {
      mon_stop_output = 0;
      if (cmd == NULL) {
@@ -45,7 +45,7 @@ diff -ur vice-1.20.orig/src/monitor/monitor.c vice-1.20/src/monitor/monitor.c
      } else {
          if (!cmd[0]) {
              if (!asm_mode) {
-@@ -1547,12 +1547,22 @@
+@@ -2187,12 +2187,22 @@ static void monitor_close(int check)
  
  void monitor_startup(void)
  {

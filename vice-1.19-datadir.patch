@@ -1,11 +1,24 @@
---- vice-2.0/src/arch/unix/archdep.h.foo	2008-07-07 20:23:10.000000000 +0200
-+++ vice-2.0/src/arch/unix/archdep.h	2008-08-01 10:19:47.000000000 +0200
-@@ -109,7 +109,7 @@ extern const char *archdep_home_path(voi
+diff -up vice-2.2/src/arch/unix/archdep.h.datadir vice-2.2/src/arch/unix/archdep.h
+--- vice-2.2/src/arch/unix/archdep.h.datadir	2009-10-21 18:46:46.000000000 +0200
++++ vice-2.2/src/arch/unix/archdep.h	2010-06-22 10:06:21.353162984 +0200
+@@ -120,7 +120,7 @@ extern const char *archdep_home_path(voi
  extern const char *archdep_pref_path;
  
  /* Define the default system directory (where the ROMs are).  */
 -#ifdef __NetBSD__
 +#if 1
- #define LIBDIR          PREFIX "/share/vice"
+ #define LIBDIR PREFIX "/share/vice"
  #else
- #define LIBDIR          PREFIX "/lib/vice"
+ #define LIBDIR PREFIX "/lib/vice"
+diff -up vice-2.2/src/arch/sdl/archdep_unix.h~ vice-2.2/src/arch/sdl/archdep_unix.h
+--- vice-2.2/src/arch/sdl/archdep_unix.h~	2009-09-21 19:36:09.000000000 +0200
++++ vice-2.2/src/arch/sdl/archdep_unix.h	2010-06-22 11:24:46.205880453 +0200
+@@ -85,7 +85,7 @@ extern const char *archdep_home_path(voi
+ extern const char *archdep_pref_path;
+ 
+ /* Define the default system directory (where the ROMs are).  */
+-#ifdef __NetBSD__
++#if 1
+ #define LIBDIR PREFIX "/share/vice"
+ #else
+ #define LIBDIR PREFIX "/lib/vice"

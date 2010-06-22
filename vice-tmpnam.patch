@@ -1,15 +1,15 @@
-diff -up vice-2.0/src/arch/unix/archdep.c.foobar vice-2.0/src/arch/unix/archdep.c
---- vice-2.0/src/arch/unix/archdep.c.foobar	2008-07-07 20:23:10.000000000 +0200
-+++ vice-2.0/src/arch/unix/archdep.c	2008-08-01 10:27:52.000000000 +0200
-@@ -416,37 +416,27 @@ char *archdep_quote_parameter(const char
+diff -up vice-2.2/src/arch/unix/archdep.c.tmpnam vice-2.2/src/arch/unix/archdep.c
+--- vice-2.2/src/arch/unix/archdep.c.tmpnam	2009-10-21 18:46:46.000000000 +0200
++++ vice-2.2/src/arch/unix/archdep.c	2010-06-22 10:09:49.650289516 +0200
+@@ -411,38 +411,26 @@ char *archdep_quote_parameter(const char
  
  char *archdep_tmpnam(void)
  {
 -#ifdef GP2X
--    static unsigned int tmp_string_counter=0;
+-    static unsigned int tmp_string_counter = 0;
 -    char tmp_string[32];
 -
--    sprintf(tmp_string,"vice%d.tmp",tmp_string_counter++);
+-    sprintf(tmp_string, "vice%d.tmp", tmp_string_counter++);
 -    return lib_stralloc(tmp_string);
 -#else
 -#ifdef HAVE_MKSTEMP
@@ -18,10 +18,22 @@ diff -up vice-2.0/src/arch/unix/archdep.c.foobar vice-2.0/src/arch/unix/archdep.
 -    int fd;
 -    char* tmp;
 -
--    tmpName = (char *)lib_malloc(ioutil_maxpathlen());
--    if ((tmp = getenv("TMPDIR")) != NULL ) {
+-    tmpName = lib_malloc(ioutil_maxpathlen());
+-    if ((tmp = getenv("TMPDIR")) != NULL) {
 -        strncpy(tmpName, tmp, ioutil_maxpathlen());
 -        tmpName[ioutil_maxpathlen() - sizeof(mkstempTemplate)] = '\0';
+-    } else {
+-        strcpy(tmpName, "/tmp" );
+-    }
+-    strcat(tmpName, mkstempTemplate);
+-    if ((fd = mkstemp(tmpName)) < 0) {
+-        tmpName[0] = '\0';
+-    } else {
+-        close(fd);
+-    }
+-
+-    lib_free(tmpName);
+-    return lib_stralloc(tmpName);
 +    char *tmp, *name;
 +    
 +    name = util_concat(archdep_home_path(), "/.vice", NULL);
@@ -33,17 +45,7 @@ diff -up vice-2.0/src/arch/unix/archdep.c.foobar vice-2.0/src/arch/unix/archdep.
 +    name = util_concat(archdep_home_path(), "/.vice/tmp", NULL);
 +    if (access(name, F_OK)) {
 +        mkdir(name, 0700);
-     }
--    else
--        strcpy(tmpName, "/tmp" );
--    strcat(tmpName, mkstempTemplate );
--    if ((fd = mkstemp(tmpName)) < 0 )
--        tmpName[0] = '\0';
--    else
--        close(fd);
- 
--    lib_free(tmpName);
--    return lib_stralloc(tmpName);
++    }
 +    tmp = tempnam(name, "vice");
 +    lib_free(name);
 +#ifndef LIB_DEBUG
