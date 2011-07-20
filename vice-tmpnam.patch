@@ -1,11 +1,11 @@
-diff -up vice-2.2/src/arch/unix/archdep.c.tmpnam vice-2.2/src/arch/unix/archdep.c
---- vice-2.2/src/arch/unix/archdep.c.tmpnam	2009-10-21 18:46:46.000000000 +0200
-+++ vice-2.2/src/arch/unix/archdep.c	2010-06-22 10:09:49.650289516 +0200
-@@ -411,38 +411,26 @@ char *archdep_quote_parameter(const char
+diff -up vice-2.3.9/src/arch/unix/archdep.c.tmpnam vice-2.3.9/src/arch/unix/archdep.c
+--- vice-2.3.9/src/arch/unix/archdep.c.tmpnam	2011-06-17 18:19:22.000000000 +0200
++++ vice-2.3.9/src/arch/unix/archdep.c	2011-07-17 14:00:38.256652134 +0200
+@@ -454,40 +454,26 @@ char *archdep_quote_parameter(const char
  
  char *archdep_tmpnam(void)
  {
--#ifdef GP2X
+-#if defined(GP2X) || defined(WIZ)
 -    static unsigned int tmp_string_counter = 0;
 -    char tmp_string[32];
 -
@@ -13,27 +13,29 @@ diff -up vice-2.2/src/arch/unix/archdep.c.tmpnam vice-2.2/src/arch/unix/archdep.
 -    return lib_stralloc(tmp_string);
 -#else
 -#ifdef HAVE_MKSTEMP
--    char *tmpName;
--    const char mkstempTemplate[] = "/vice.XXXXXX";
+-    char *tmp_name;
+-    const char mkstemp_template[] = "/vice.XXXXXX";
 -    int fd;
--    char* tmp;
+-    char *tmp;
+-    char *final_name;
 -
--    tmpName = lib_malloc(ioutil_maxpathlen());
+-    tmp_name = lib_malloc(ioutil_maxpathlen());
 -    if ((tmp = getenv("TMPDIR")) != NULL) {
--        strncpy(tmpName, tmp, ioutil_maxpathlen());
--        tmpName[ioutil_maxpathlen() - sizeof(mkstempTemplate)] = '\0';
+-        strncpy(tmp_name, tmp, ioutil_maxpathlen());
+-        tmp_name[ioutil_maxpathlen() - sizeof(mkstemp_template)] = '\0';
 -    } else {
--        strcpy(tmpName, "/tmp" );
+-        strcpy(tmp_name, "/tmp");
 -    }
--    strcat(tmpName, mkstempTemplate);
--    if ((fd = mkstemp(tmpName)) < 0) {
--        tmpName[0] = '\0';
+-    strcat(tmp_name, mkstemp_template);
+-    if ((fd = mkstemp(tmp_name)) < 0) {
+-        tmp_name[0] = '\0';
 -    } else {
 -        close(fd);
 -    }
 -
--    lib_free(tmpName);
--    return lib_stralloc(tmpName);
+-    final_name = lib_stralloc(tmp_name);
+-    lib_free(tmp_name);
+-    return final_name;
 +    char *tmp, *name;
 +    
 +    name = util_concat(archdep_home_path(), "/.vice", NULL);

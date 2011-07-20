@@ -1,11 +1,13 @@
 Name:           vice
-Version:        2.2
+Version:        2.3.9
 Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPL
-URL:            http://www.viceteam.org/
-Source0:        http://www.zimmers.net/anonftp/pub/cbm/crossplatform/emulators/VICE/vice-%{version}.tar.gz
+URL:            http://vice-emu.sourceforge.net/
+Source0:        http://downloads.sourceforge.net/vice-emu/%{name}-%{version}.tar.gz
+# File from upstream missing from tarbal
+Source10:       cartio.h
 Source1:        x128.desktop
 Source2:        x64.desktop
 Source3:        xcbm-ii.desktop
@@ -19,12 +21,13 @@ Patch1:         vice-1.19-datadir.patch
 Patch2:         vice-htmlview.patch
 Patch3:         vice-tmpnam.patch
 Patch4:         vice-1.20-monitor-crash.patch
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  libXt-devel libXext-devel libXxf86vm-devel libXxf86dga-devel
+BuildRequires:  libXrandr-devel
 BuildRequires:  giflib-devel libjpeg-devel libpng-devel
 BuildRequires:  libgnomeui-devel gtkglext-devel
 BuildRequires:  ffmpeg-devel lame-devel
-BuildRequires:  readline-devel SDL-devel alsa-lib-devel
+BuildRequires:  readline-devel SDL-devel alsa-lib-devel pulseaudio-libs-devel
+BuildRequires:  libieee1284-devel libpcap-devel
 BuildRequires:  bison flex gettext info desktop-file-utils xorg-x11-font-utils
 Requires:       hicolor-icon-theme xdg-utils
 
@@ -46,10 +49,13 @@ for i in man/*.1 doc/*.info*; do
 done
 # not really needed, make sure these don't get used:
 rm -f src/lib/*/*.c src/lib/*/*.h
+# File from upstream missing from tarbal
+cp -a %{SOURCE10} src
 
 
 %build
-%configure --enable-sdlui --without-esd
+COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch"
+%configure --enable-sdlui $COMMON_FLAGS
 make %{?_smp_mflags}
 pushd src
   for i in x*; do
@@ -58,12 +64,11 @@ pushd src
 popd
 
 make distclean
-%configure --enable-gnomeui --enable-fullscreen --without-esd
+%configure --enable-gnomeui --enable-fullscreen $COMMON_FLAGS
 make %{?_smp_mflags} LD_FLAGS=-lX11
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT VICEDIR=%{_datadir}/%{name}
 for i in x*.sdl; do
   install -p -m 755 $i $RPM_BUILD_ROOT%{_bindir}
@@ -75,7 +80,9 @@ pushd data
 popd
 %find_lang %{name}
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
-
+# for some reason make install drops a .txt and .pdf in the infodir ... ?
+rm $RPM_BUILD_ROOT%{_infodir}/%{name}.txt*
+rm $RPM_BUILD_ROOT%{_infodir}/%{name}.pdf*
 # vice installs its docs under /usr/share/vice/doc, we install them ourselves
 # with %doc, so nuke vice's install and create a symlink for the help function
 rm -rf $RPM_BUILD_ROOT%{_datadir}/%{name}/doc
@@ -103,14 +110,9 @@ cd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor
 for i in */apps/*icon.png; do mv $i `echo $i|sed s/icon//`; done
 
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-
 %post
 /sbin/install-info %{_infodir}/%{name}.info %{_infodir}/dir || :
-touch --no-create %{_datadir}/icons/hicolor || :
-%{_bindir}/gtk-update-icon-cache --quiet %{_datadir}/icons/hicolor || :
+touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
 
 %preun
 if [ "$1" = 0 ]; then
@@ -118,13 +120,18 @@ if [ "$1" = 0 ]; then
 fi
 
 %postun
-touch --no-create %{_datadir}/icons/hicolor || :
-%{_bindir}/gtk-update-icon-cache --quiet %{_datadir}/icons/hicolor || :
+if [ $1 -eq 0 ] ; then
+    touch --no-create %{_datadir}/icons/hicolor &>/dev/null
+    gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+fi
+
+%posttrans
+gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %files -f %{name}.lang
 %defattr(-,root,root,-)
-%doc AUTHORS ChangeLog FEEDBACK README doc/mon.txt doc/iec-bus.txt
+%doc AUTHORS ChangeLog FEEDBACK README doc/iec-bus.txt
 %doc doc/html/*.html doc/html/images/* doc/html/plain/*
 %{_bindir}/*
 %{_datadir}/%{name}
@@ -135,6 +142,9 @@ touch --no-create %{_datadir}/icons/hicolor || :
 
 
 %changelog
+* Sun Jul 17 2011 Hans de Goede <j.w.r.degoede@hhs.nl> 2.3.9-1
+- New upstream release 2.3.9
+
 * Tue Jun 22 2010 Hans de Goede <j.w.r.degoede@hhs.nl> 2.2-1
 - New upstream release 2.2
 - Also build the new SDL version, the SDL binaries are available with a
