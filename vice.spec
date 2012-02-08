@@ -1,6 +1,6 @@
 Name:           vice
 Version:        2.3.9
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPL
@@ -142,6 +142,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Thu Feb 09 2012 Nicolas Chauvet <kwizart@gmail.com> - 2.3.9-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
 * Sun Jul 17 2011 Hans de Goede <j.w.r.degoede@hhs.nl> 2.3.9-1
 - New upstream release 2.3.9
 
