@@ -1,13 +1,11 @@
 Name:           vice
-Version:        2.3.9
-Release:        3%{?dist}
+Version:        2.4
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPL
 URL:            http://vice-emu.sourceforge.net/
 Source0:        http://downloads.sourceforge.net/vice-emu/%{name}-%{version}.tar.gz
-# File from upstream missing from tarbal
-Source10:       cartio.h
 Source1:        x128.desktop
 Source2:        x64.desktop
 Source3:        xcbm-ii.desktop
@@ -20,7 +18,6 @@ Source9:        vice-largeicons.tar.bz2
 Patch1:         vice-1.19-datadir.patch
 Patch2:         vice-htmlview.patch
 Patch3:         vice-tmpnam.patch
-Patch4:         vice-1.20-monitor-crash.patch
 BuildRequires:  libXt-devel libXext-devel libXxf86vm-devel libXxf86dga-devel
 BuildRequires:  libXrandr-devel
 BuildRequires:  giflib-devel libjpeg-devel libpng-devel
@@ -38,46 +35,58 @@ C128, VIC-20, PET (all models, except SuperPET 9000), Plus-4, CBM-II
 
 
 %prep
-%setup -q
+%setup -c -q
+pushd %{name}-%{version}
 %patch1 -p1 -z .datadir
 %patch2 -p1 -z .htmlview
 %patch3 -p1 -z .tmpnam
-%patch4 -p1 -z .mon
 for i in man/*.1 doc/*.info*; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
    mv $i.tmp $i
 done
 # not really needed, make sure these don't get used:
-rm -f src/lib/*/*.c src/lib/*/*.h
-# File from upstream missing from tarbal
-cp -a %{SOURCE10} src
+rm -f src/lib/libffmpeg/*.c src/lib/libffmpeg/*.h
+popd
+
+mv %{name}-%{version} %{name}-%{version}.gtk
+cp -a %{name}-%{version}.gtk %{name}-%{version}.sdl
+# for %doc
+ln -s %{name}-%{version}.gtk/doc doc
 
 
 %build
-COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch"
-%configure --enable-sdlui $COMMON_FLAGS
-make %{?_smp_mflags}
-pushd src
-  for i in x*; do
-    mv $i ../$i.sdl
-  done
+# --disable-ffmpeg since the ffmpeg code does not work with recent ffmpeg
+COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch --disable-ffmpeg"
+
+pushd %{name}-%{version}.gtk
+  %configure --enable-gnomeui --enable-fullscreen $COMMON_FLAGS
+  make %{?_smp_mflags}
 popd
 
-make distclean
-%configure --enable-gnomeui --enable-fullscreen $COMMON_FLAGS
-make %{?_smp_mflags} LD_FLAGS=-lX11
+pushd %{name}-%{version}.sdl
+  %configure --enable-sdlui $COMMON_FLAGS
+  make %{?_smp_mflags}
+popd
 
 
 %install
+pushd %{name}-%{version}.gtk
 make install DESTDIR=$RPM_BUILD_ROOT VICEDIR=%{_datadir}/%{name}
-for i in x*.sdl; do
-  install -p -m 755 $i $RPM_BUILD_ROOT%{_bindir}
-done
-pushd data
-  for i in */sdl_sym.vkm; do
-    cp -a --parents $i $RPM_BUILD_ROOT%{_datadir}/%{name}
-  done
 popd
+
+pushd %{name}-%{version}.sdl
+  pushd src
+    for i in x*; do
+      install -p -m 755 $i $RPM_BUILD_ROOT%{_bindir}/$i.sdl
+    done
+  popd
+  pushd data
+    for i in */sdl_sym.vkm; do
+      cp -a --parents $i $RPM_BUILD_ROOT%{_datadir}/%{name}
+    done
+  popd
+popd
+
 %find_lang %{name}
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 # for some reason make install drops a .txt and .pdf in the infodir ... ?
@@ -92,9 +101,14 @@ ln -s ../doc/%{name}-%{version} $RPM_BUILD_ROOT%{_datadir}/%{name}/doc
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/applications
 for i in x128.desktop x64.desktop xcbm-ii.desktop xpet.desktop xplus4.desktop \
     xvic.desktop; do
+%if 0%{?fedora} <= 18
   desktop-file-install --vendor dribble           \
     --dir $RPM_BUILD_ROOT%{_datadir}/applications \
     $RPM_SOURCE_DIR/$i
+%else
+  desktop-file-install --dir $RPM_BUILD_ROOT%{_datadir}/applications \
+    $RPM_SOURCE_DIR/$i
+%endif
 done
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/16x16/apps
 cd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/16x16/apps
@@ -106,8 +120,9 @@ mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/48x48/apps
 cd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/48x48/apps
 tar xvfj %{SOURCE9}
 # remove "icon" from the icons name they are already in the icons dir.
-cd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor
+pushd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor
 for i in */apps/*icon.png; do mv $i `echo $i|sed s/icon//`; done
+popd
 
 
 %post
@@ -130,18 +145,23 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %files -f %{name}.lang
-%defattr(-,root,root,-)
-%doc AUTHORS ChangeLog FEEDBACK README doc/iec-bus.txt
-%doc doc/html/*.html doc/html/images/* doc/html/plain/*
+%doc %{name}-%{version}.gtk/AUTHORS %{name}-%{version}.gtk/ChangeLog
+%doc %{name}-%{version}.gtk/FEEDBACK %{name}-%{version}.gtk/README
+%doc doc/iec-bus.txt doc/html/*.html doc/html/images doc/html/plain
 %{_bindir}/*
 %{_datadir}/%{name}
-%{_datadir}/applications/dribble-*.desktop
+%{_datadir}/applications/*.desktop
 %{_datadir}/icons/hicolor/*/apps/*.png
 %{_infodir}/%{name}.info*
 %{_mandir}/man1/*.1.gz
 
 
 %changelog
+* Sat Mar  2 2013 Hans de Goede <j.w.r.degoede@hhs.nl> - 2.4-1
+- New upstream release 2.4 (rf#2610)
+- Fixes xvic sound (rf#2578)
+- Fixes fullscreen issues (rf#2352)
+
 * Thu Mar 08 2012 Nicolas Chauvet <kwizart@gmail.com> - 2.3.9-3
 - Rebuilt for c++ ABI breakage
 
