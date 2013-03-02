@@ -1,6 +1,6 @@
 Name:           vice
 Version:        2.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPL
@@ -21,7 +21,7 @@ Patch3:         vice-tmpnam.patch
 BuildRequires:  libXt-devel libXext-devel libXxf86vm-devel libXxf86dga-devel
 BuildRequires:  libXrandr-devel
 BuildRequires:  giflib-devel libjpeg-devel libpng-devel
-BuildRequires:  libgnomeui-devel gtkglext-devel
+BuildRequires:  libgnomeui-devel gtkglext-devel vte-devel
 BuildRequires:  ffmpeg-devel lame-devel
 BuildRequires:  readline-devel SDL-devel alsa-lib-devel pulseaudio-libs-devel
 BuildRequires:  libieee1284-devel libpcap-devel
@@ -157,6 +157,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Sat Mar  2 2013 Hans de Goede <j.w.r.degoede@hhs.nl> - 2.4-2
+- Add missing vte-devel BuildRequires
+
 * Sat Mar  2 2013 Hans de Goede <j.w.r.degoede@hhs.nl> - 2.4-1
 - New upstream release 2.4 (rf#2610)
 - Fixes xvic sound (rf#2578)
