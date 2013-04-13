@@ -1,9 +1,9 @@
 Name:           vice
 Version:        2.4
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
-License:        GPL
+License:        GPLv2+
 URL:            http://vice-emu.sourceforge.net/
 Source0:        http://downloads.sourceforge.net/vice-emu/%{name}-%{version}.tar.gz
 Source1:        x128.desktop
@@ -27,11 +27,23 @@ BuildRequires:  readline-devel SDL-devel alsa-lib-devel pulseaudio-libs-devel
 BuildRequires:  libieee1284-devel libpcap-devel
 BuildRequires:  bison flex gettext info desktop-file-utils xorg-x11-font-utils
 Requires:       hicolor-icon-theme xdg-utils
+Requires:       %{name}-data = %{version}-%{release}
 
 %description
 An emulator for a variety of Commodore 8bit machines, including the C16, C64,
 C128, VIC-20, PET (all models, except SuperPET 9000), Plus-4, CBM-II
 (aka C610)
+
+
+%package        data
+Summary:        Data files for %{name}
+Group:          Applications/Emulators
+Provides:       sidplayfp-data = %{version}-%{release}
+BuildArch:      noarch
+
+%description    data
+Data files for %{name}. These can also be used together with libsidplayfp
+based sid music players.
 
 
 %prep
@@ -40,8 +52,9 @@ pushd %{name}-%{version}
 %patch1 -p1 -z .datadir
 %patch2 -p1 -z .htmlview
 %patch3 -p1 -z .tmpnam
-for i in man/*.1 doc/*.info*; do
+for i in man/*.1 doc/*.info* doc/html/plain/* README AUTHORS; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
+   touch -r $i $i.tmp
    mv $i.tmp $i
 done
 # not really needed, make sure these don't get used:
@@ -50,7 +63,7 @@ popd
 
 mv %{name}-%{version} %{name}-%{version}.gtk
 cp -a %{name}-%{version}.gtk %{name}-%{version}.sdl
-# for %doc
+# for %%doc
 ln -s %{name}-%{version}.gtk/doc doc
 
 
@@ -93,22 +106,25 @@ rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 rm -f $RPM_BUILD_ROOT%{_infodir}/%{name}.txt*
 rm -f $RPM_BUILD_ROOT%{_infodir}/%{name}.pdf*
 # vice installs its docs under /usr/share/vice/doc, we install them ourselves
-# with %doc, so nuke vice's install and create a symlink for the help function
+# with %%doc, so nuke vice's install and create a symlink for the help function
 rm -rf $RPM_BUILD_ROOT%{_datadir}/%{name}/doc
 ln -s ../doc/%{name}-%{version} $RPM_BUILD_ROOT%{_datadir}/%{name}/doc
+# for use of the -data package with libsidplay bases sid players
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/sidplayfp
+for i in basic chargen kernal; do
+  ln -s ../vice/C64/$i $RPM_BUILD_ROOT%{_datadir}/sidplayfp/$i
+done
 
 # below is the desktop file and icon stuff.
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/applications
 for i in x128.desktop x64.desktop xcbm-ii.desktop xpet.desktop xplus4.desktop \
     xvic.desktop; do
-%if 0%{?fedora} <= 18
-  desktop-file-install --vendor dribble           \
+  desktop-file-install \
+%if 0%{?fedora} && 0%{?fedora} < 19
+    --vendor dribble \
+%endif
     --dir $RPM_BUILD_ROOT%{_datadir}/applications \
     $RPM_SOURCE_DIR/$i
-%else
-  desktop-file-install --dir $RPM_BUILD_ROOT%{_datadir}/applications \
-    $RPM_SOURCE_DIR/$i
-%endif
 done
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/16x16/apps
 cd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/16x16/apps
@@ -149,14 +165,21 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %doc %{name}-%{version}.gtk/FEEDBACK %{name}-%{version}.gtk/README
 %doc doc/iec-bus.txt doc/html/*.html doc/html/images doc/html/plain
 %{_bindir}/*
-%{_datadir}/%{name}
 %{_datadir}/applications/*.desktop
 %{_datadir}/icons/hicolor/*/apps/*.png
 %{_infodir}/%{name}.info*
 %{_mandir}/man1/*.1.gz
 
+%files data
+%{_datadir}/%{name}
+%{_datadir}/sidplayfp
+
 
 %changelog
+* Sat Apr 13 2013 Hans de Goede <j.w.r.degoede@hhs.nl> - 2.4-3
+- Split out the data files into a vice-data subpackage, so that they can be
+  used together with libsidplayfp bases sid players
+
 * Sat Mar  2 2013 Hans de Goede <j.w.r.degoede@hhs.nl> - 2.4-2
 - Add missing vte-devel BuildRequires
 
