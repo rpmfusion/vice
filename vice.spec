@@ -1,6 +1,6 @@
 Name:           vice
 Version:        2.4
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -176,6 +176,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Sun Aug 31 2014 Sérgio Basto <sergio@serjux.com> - 2.4-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
 * Sat Apr 13 2013 Hans de Goede <j.w.r.degoede@hhs.nl> - 2.4-3
 - Split out the data files into a vice-data subpackage, so that they can be
   used together with libsidplayfp bases sid players
