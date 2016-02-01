@@ -1,6 +1,6 @@
 Name:           vice
-Version:        2.4
-Release:        4%{?dist}
+Version:        2.4.24
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -15,9 +15,9 @@ Source6:        xvic.desktop
 Source7:        vice-miniicons.tar.bz2
 Source8:        vice-normalicons.tar.bz2
 Source9:        vice-largeicons.tar.bz2
-Patch1:         vice-1.19-datadir.patch
+Patch1:         vice-2.4.24-datadir.patch
 Patch2:         vice-htmlview.patch
-Patch3:         vice-tmpnam.patch
+Patch3:         vice-norpath.patch
 BuildRequires:  libXt-devel libXext-devel libXxf86vm-devel libXxf86dga-devel
 BuildRequires:  libXrandr-devel
 BuildRequires:  giflib-devel libjpeg-devel libpng-devel
@@ -51,14 +51,12 @@ based sid music players.
 pushd %{name}-%{version}
 %patch1 -p1 -z .datadir
 %patch2 -p1 -z .htmlview
-%patch3 -p1 -z .tmpnam
-for i in man/*.1 doc/*.info* doc/html/plain/* README AUTHORS; do
+%patch3 -p1 -z .norpath
+for i in man/*.1 doc/*.info* README AUTHORS; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
    touch -r $i $i.tmp
    mv $i.tmp $i
 done
-# not really needed, make sure these don't get used:
-rm -f src/lib/libffmpeg/*.c src/lib/libffmpeg/*.h
 popd
 
 mv %{name}-%{version} %{name}-%{version}.gtk
@@ -68,8 +66,10 @@ ln -s %{name}-%{version}.gtk/doc doc
 
 
 %build
-# --disable-ffmpeg since the ffmpeg code does not work with recent ffmpeg
-COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch --disable-ffmpeg"
+COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch"
+
+# workaround needed to fix incorrect toolchain check in configure script
+export toolchain_check=no
 
 pushd %{name}-%{version}.gtk
   %configure --enable-gnomeui --enable-fullscreen $COMMON_FLAGS
@@ -163,7 +163,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %files -f %{name}.lang
 %doc %{name}-%{version}.gtk/AUTHORS %{name}-%{version}.gtk/ChangeLog
 %doc %{name}-%{version}.gtk/FEEDBACK %{name}-%{version}.gtk/README
-%doc doc/iec-bus.txt doc/html/*.html doc/html/images doc/html/plain
+%doc doc/iec-bus.txt doc/html/*.html doc/html/images
 %{_bindir}/*
 %{_datadir}/applications/*.desktop
 %{_datadir}/icons/hicolor/*/apps/*.png
@@ -176,6 +176,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Mon Feb  1 2016 Roland Hermans <rolandh@users.sourceforge.net> - 2.4.24-1
+- Patches and updates for VICE 2.4.24 on Fedora 23.
+
 * Sun Aug 31 2014 Sérgio Basto <sergio@serjux.com> - 2.4-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 

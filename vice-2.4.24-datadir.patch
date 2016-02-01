@@ -1,0 +1,45 @@
+diff -ru vice-2.4.24.orig/configure vice-2.4.24.new/configure
+--- vice-2.4.24.orig/configure	2015-12-16 03:48:02.000000000 +0100
++++ vice-2.4.24.new/configure	2016-01-30 16:38:50.905479248 +0100
+@@ -23449,7 +23449,7 @@
+     ;;
+   linux*)
+     if test x"$host_cpu" = "xx86_64"; then
+-      VICEDIR="$PREFIX/lib64/vice"
++      VICEDIR="$PREFIX/share/vice"
+        if false; then
+   ALTERNATE_DOCDIR_TRUE=
+   ALTERNATE_DOCDIR_FALSE='#'
+@@ -23459,7 +23459,7 @@
+ fi
+ 
+     else
+-      VICEDIR="$PREFIX/lib/vice"
++      VICEDIR="$PREFIX/share/vice"
+        if false; then
+   ALTERNATE_DOCDIR_TRUE=
+   ALTERNATE_DOCDIR_FALSE='#'
+diff -ru vice-2.4.24.orig/src/arch/sdl/archdep_unix.h vice-2.4.24.new/src/arch/sdl/archdep_unix.h
+--- vice-2.4.24.orig/src/arch/sdl/archdep_unix.h	2015-07-26 18:00:29.000000000 +0200
++++ vice-2.4.24.new/src/arch/sdl/archdep_unix.h	2016-01-30 16:37:38.332564351 +0100
+@@ -86,7 +86,7 @@
+ 
+ #define LIBDIR VICEDIR
+ 
+-#if defined(__FreeBSD__) || defined(__NetBSD__)
++#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__linux__)
+ #define DOCDIR PREFIX "/share/doc/vice"
+ #else
+ #define DOCDIR LIBDIR "/doc"
+diff -ru vice-2.4.24.orig/src/arch/unix/archdep.h vice-2.4.24.new/src/arch/unix/archdep.h
+--- vice-2.4.24.orig/src/arch/unix/archdep.h	2015-07-26 18:00:38.000000000 +0200
++++ vice-2.4.24.new/src/arch/unix/archdep.h	2016-01-30 16:37:18.874050922 +0100
+@@ -127,7 +127,7 @@
+ 
+ #define LIBDIR VICEDIR
+ 
+-#if defined(__FreeBSD__) || defined(__NetBSD__)
++#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__linux__)
+ #define DOCDIR PREFIX "/share/doc/vice"
+ #else
+ #define DOCDIR LIBDIR "/doc"

@@ -1,12 +1,12 @@
-diff -up vice-2.0/src/arch/unix/x11/ui-resources.c.bar vice-2.0/src/arch/unix/x11/ui-resources.c
---- vice-2.0/src/arch/unix/x11/ui-resources.c.bar	2008-07-07 20:23:10.000000000 +0200
-+++ vice-2.0/src/arch/unix/x11/ui-resources.c	2008-08-01 10:24:23.000000000 +0200
-@@ -112,7 +112,7 @@ static const resource_string_t resources
+diff -ru vice-2.4.24.orig/src/arch/unix/x11/ui-resources.c vice-2.4.24.new/src/arch/unix/x11/ui-resources.c
+--- vice-2.4.24.orig/src/arch/unix/x11/ui-resources.c	2015-07-26 18:00:51.000000000 +0200
++++ vice-2.4.24.new/src/arch/unix/x11/ui-resources.c	2016-01-30 16:41:47.478138264 +0100
+@@ -172,7 +172,7 @@
  #ifdef MACOSX_SUPPORT    
-       "/usr/bin/open %s",
+ #define HTML_BROWSER_COMMAND_DEFAULT "/usr/bin/open %s"
  #else
--      "firefox %s",
-+      "xdg-open %s",
+-#define HTML_BROWSER_COMMAND_DEFAULT "firefox %s"
++#define HTML_BROWSER_COMMAND_DEFAULT "xdg-open %s"
  #endif
-       RES_EVENT_NO, NULL,
-       &ui_resources.html_browser_command,
+ 
+ static const resource_string_t resources_string[] = {
