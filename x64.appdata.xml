@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component type="desktop">
+  <id>x64.desktop</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0+ and proprietary</project_license>
+  <name>Vice</name>
+  <summary>Versatile Commodore Emulator</summary>
+  <description>
+    <p>
+      Vice is an emulator for a variety of Commodore 8bit machines, including
+      the C16, C64, C128, VIC-20, PET (all models, except SuperPET 9000),
+      Plus-4 and CBM-II (aka C610).
+    </p>
+    <p>
+      The main Vice package contains the x64 Commodore 64 emulator. The
+      emulators for the other Commodore 8bit machines are available as
+      add-ons to the main Vice package.
+    </p>
+  </description>
+  <url type="homepage">http://vice-emu.sourceforge.net/</url>
+  <url type="help">http://vice-emu.sourceforge.net/vice_toc.html</url>
+  <screenshots>
+    <screenshot type="default">https://noz3001.files.wordpress.com/2010/06/vice-c64-emulator_002.png</screenshot>
+    <screenshot>https://noz3001.files.wordpress.com/2010/06/vice-c64-emulator_005.png</screenshot>
+  </screenshots>
+  <updatecontact>jwrdegoede_at_gmail.com</updatecontact>
+</component>

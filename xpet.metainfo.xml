@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component type="addon">
+  <id>xpet.desktop</id>
+  <extends>x64.desktop</extends>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0+ and proprietary</project_license>
+  <name>Commodore PET emulator</name>
+  <summary>Vice Commodore Pet emulator, emulates the 2001, 3032, 4032, 8032, 8096, 8296 and SuperPET models</summary>
+  <url type="homepage">http://vice-emu.sourceforge.net/</url>
+  <updatecontact>jwrdegoede_at_gmail.com</updatecontact>
+</component>

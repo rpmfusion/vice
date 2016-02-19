@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component type="addon">
+  <id>xcbm-ii.desktop</id>
+  <extends>x64.desktop</extends>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0+ and proprietary</project_license>
+  <name>Commodore CBM-II emulator</name>
+  <summary>Vice Commodore CBM-II emulator, emulates several types of CBM-II models</summary>
+  <url type="homepage">http://vice-emu.sourceforge.net/</url>
+  <updatecontact>jwrdegoede_at_gmail.com</updatecontact>
+</component>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component type="addon">
+  <id>xvic.desktop</id>
+  <extends>x64.desktop</extends>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0+ and proprietary</project_license>
+  <name>Commodore VIC-20 emulator</name>
+  <summary>Vice Commodore VIC-20 emulator, emulates the complete VIC-1 video</summary>
+  <url type="homepage">http://vice-emu.sourceforge.net/</url>
+  <updatecontact>jwrdegoede_at_gmail.com</updatecontact>
+</component>
