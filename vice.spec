@@ -1,6 +1,6 @@
 Name:           vice
 Version:        2.4.24
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -235,6 +235,8 @@ fi
 gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
+%files
+
 %files common -f %{name}.lang
 %doc %{name}-%{version}.gtk/AUTHORS %{name}-%{version}.gtk/ChangeLog
 %doc %{name}-%{version}.gtk/FEEDBACK %{name}-%{version}.gtk/README
@@ -284,6 +286,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Mon Feb 22 2016 Hans de Goede <j.w.r.degoede@gmail.com> - 2.4.24-3
+- Actually create the vice meta-package so that upgrades work
+
 * Wed Feb 17 2016 Hans de Goede <j.w.r.degoede@gmail.com> - 2.4.24-2
 - Split out all the different emulators into separate sub-packages,
   make "vice" a meta packages which simply installs all of them
