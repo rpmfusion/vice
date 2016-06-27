@@ -1,6 +1,6 @@
 Name:           vice
-Version:        2.4.24
-Release:        3%{?dist}
+Version:        2.4.28
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -24,6 +24,7 @@ Source15:       xvic.metainfo.xml
 Patch1:         vice-2.4.24-datadir.patch
 Patch2:         vice-htmlview.patch
 Patch3:         vice-norpath.patch
+Patch4:         vice-2.4.28-sdl-build-fix.patch
 BuildRequires:  libXt-devel libXext-devel libXxf86vm-devel libXxf86dga-devel
 BuildRequires:  libXrandr-devel
 BuildRequires:  giflib-devel libjpeg-devel libpng-devel
@@ -123,9 +124,13 @@ Vice Commodore VIC-20 Emulator.
 %prep
 %setup -c -q
 pushd %{name}-%{version}
+sed -i 's/\r//' `find -name "*.h"`
+sed -i 's/\r//' `find -name "*.c"`
+sed -i 's/\r//' `find -name "*.cc"`
 %patch1 -p1 -z .datadir
 %patch2 -p1 -z .htmlview
 %patch3 -p1 -z .norpath
+%patch4 -p1 -z .norpath
 for i in man/*.1 doc/*.info* README AUTHORS; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
    touch -r $i $i.tmp
@@ -135,8 +140,6 @@ popd
 
 mv %{name}-%{version} %{name}-%{version}.gtk
 cp -a %{name}-%{version}.gtk %{name}-%{version}.sdl
-# for %%doc
-ln -s %{name}-%{version}.gtk/doc doc
 
 
 %build
@@ -149,18 +152,22 @@ export CXX=g++
 
 pushd %{name}-%{version}.gtk
   %configure --enable-gnomeui --enable-fullscreen $COMMON_FLAGS
+  # Ensure the system versions of these are used
+  rm -r src/lib/lib* src/lib/ffmpeg
   make %{?_smp_mflags}
 popd
 
 pushd %{name}-%{version}.sdl
   %configure --enable-sdlui $COMMON_FLAGS
+  # Ensure the system versions of these are used
+  rm -r src/lib/lib* src/lib/ffmpeg
   make %{?_smp_mflags}
 popd
 
 
 %install
 pushd %{name}-%{version}.gtk
-make install DESTDIR=$RPM_BUILD_ROOT VICEDIR=%{_datadir}/%{name}
+%make_install VICEDIR=%{_datadir}/%{name}
 popd
 
 pushd %{name}-%{version}.sdl
@@ -179,8 +186,8 @@ popd
 %find_lang %{name}
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 # for some reason make install drops a .txt and .pdf in the infodir ... ?
-rm -f $RPM_BUILD_ROOT%{_infodir}/%{name}.txt*
-rm -f $RPM_BUILD_ROOT%{_infodir}/%{name}.pdf*
+rm $RPM_BUILD_ROOT%{_infodir}/%{name}.txt*
+rm $RPM_BUILD_ROOT%{_infodir}/%{name}.pdf*
 # vice installs its docs under /usr/share/vice/doc, we install them ourselves
 # with %%doc, so nuke vice's install and create a symlink for the help function
 rm -rf $RPM_BUILD_ROOT%{_datadir}/%{name}/doc
@@ -240,7 +247,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %files common -f %{name}.lang
 %doc %{name}-%{version}.gtk/AUTHORS %{name}-%{version}.gtk/ChangeLog
 %doc %{name}-%{version}.gtk/FEEDBACK %{name}-%{version}.gtk/README
-%doc doc/iec-bus.txt doc/html/*.html doc/html/images
+%doc %{name}-%{version}.gtk/doc/iec-bus.txt
+%doc %{name}-%{version}.gtk/doc/html/*.html
+%doc %{name}-%{version}.gtk/doc/html/images
 %{_bindir}/c1541
 %{_bindir}/cartconv
 %{_bindir}/petcat
@@ -286,6 +295,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Mon Jun 27 2016 Hans de Goede <j.w.r.degoede@gmail.com> - 2.4.28-1
+- New upstream release 2.4.28
+
 * Mon Feb 22 2016 Hans de Goede <j.w.r.degoede@gmail.com> - 2.4.24-3
 - Actually create the vice meta-package so that upgrades work
 
