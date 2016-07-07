@@ -186,8 +186,8 @@ popd
 %find_lang %{name}
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 # for some reason make install drops a .txt and .pdf in the infodir ... ?
-rm $RPM_BUILD_ROOT%{_infodir}/%{name}.txt*
-rm $RPM_BUILD_ROOT%{_infodir}/%{name}.pdf*
+rm -f $RPM_BUILD_ROOT%{_infodir}/%{name}.txt*
+rm -f $RPM_BUILD_ROOT%{_infodir}/%{name}.pdf*
 # vice installs its docs under /usr/share/vice/doc, we install them ourselves
 # with %%doc, so nuke vice's install and create a symlink for the help function
 rm -rf $RPM_BUILD_ROOT%{_datadir}/%{name}/doc
