@@ -1,6 +1,6 @@
 Name:           vice
 Version:        2.4.28
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -295,6 +295,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Sun Mar 26 2017 RPM Fusion Release Engineering <kwizart@rpmfusion.org> - 2.4.28-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
 * Mon Jun 27 2016 Hans de Goede <j.w.r.degoede@gmail.com> - 2.4.28-1
 - New upstream release 2.4.28
 
