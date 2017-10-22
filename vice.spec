@@ -1,6 +1,6 @@
 Name:           vice
-Version:        2.4.28
-Release:        3%{?dist}
+Version:        3.1
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -24,16 +24,33 @@ Source15:       xvic.metainfo.xml
 Patch1:         vice-2.4.24-datadir.patch
 Patch2:         vice-htmlview.patch
 Patch3:         vice-norpath.patch
-Patch4:         vice-2.4.28-sdl-build-fix.patch
-BuildRequires:  libXt-devel libXext-devel libXxf86vm-devel libXxf86dga-devel
+BuildRequires:  libXt-devel
+BuildRequires:  libXext-devel
+BuildRequires:  libXxf86vm-devel
+BuildRequires:  libXxf86dga-devel
 BuildRequires:  libXrandr-devel
-BuildRequires:  giflib-devel libjpeg-devel libpng-devel
-BuildRequires:  libgnomeui-devel gtkglext-devel vte-devel
-BuildRequires:  ffmpeg-devel lame-devel
-BuildRequires:  readline-devel SDL-devel alsa-lib-devel pulseaudio-libs-devel
-BuildRequires:  libieee1284-devel libpcap-devel
-BuildRequires:  bison flex gettext info desktop-file-utils xorg-x11-font-utils
+BuildRequires:  giflib-devel
+BuildRequires:  libjpeg-devel
+BuildRequires:  libpng-devel
+BuildRequires:  libgnomeui-devel
+BuildRequires:  gtkglext-devel
+BuildRequires:  vte-devel
+BuildRequires:  ffmpeg-devel
+BuildRequires:  lame-devel
+BuildRequires:  readline-devel
+BuildRequires:  SDL-devel
+BuildRequires:  alsa-lib-devel
+BuildRequires:  pulseaudio-libs-devel
+BuildRequires:  libieee1284-devel
+BuildRequires:  libpcap-devel
+BuildRequires:  bison
+BuildRequires:  flex
+BuildRequires:  gettext
+BuildRequires:  info
+BuildRequires:  desktop-file-utils
+BuildRequires:  xorg-x11-font-utils
 BuildRequires:  libappstream-glib
+
 Requires:       %{name}-x64 = %{version}-%{release}
 Requires:       %{name}-x128 = %{version}-%{release}
 Requires:       %{name}-xcbm-ii = %{version}-%{release}
@@ -130,7 +147,6 @@ sed -i 's/\r//' `find -name "*.cc"`
 %patch1 -p1 -z .datadir
 %patch2 -p1 -z .htmlview
 %patch3 -p1 -z .norpath
-%patch4 -p1 -z .norpath
 for i in man/*.1 doc/*.info* README AUTHORS; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
    touch -r $i $i.tmp
@@ -154,14 +170,14 @@ pushd %{name}-%{version}.gtk
   %configure --enable-gnomeui --enable-fullscreen $COMMON_FLAGS
   # Ensure the system versions of these are used
   rm -r src/lib/lib* src/lib/ffmpeg
-  make %{?_smp_mflags}
+  %make_build
 popd
 
 pushd %{name}-%{version}.sdl
   %configure --enable-sdlui $COMMON_FLAGS
   # Ensure the system versions of these are used
   rm -r src/lib/lib* src/lib/ffmpeg
-  make %{?_smp_mflags}
+  %make_build
 popd
 
 
@@ -295,6 +311,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Sun Oct  22 2017 Roland Hermans <rolandh@users.sourceforge.net> - 3.1-1
+- New upstream release 3.1 (rfbz #4528 #4429)
+
 * Thu Aug 31 2017 RPM Fusion Release Engineering <kwizart@rpmfusion.org> - 2.4.28-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
 
