@@ -1,6 +1,6 @@
 Name:           vice
 Version:        3.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -311,6 +311,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Fri Mar 02 2018 RPM Fusion Release Engineering <leigh123linux@googlemail.com> - 3.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
 * Sun Oct  22 2017 Roland Hermans <rolandh@users.sourceforge.net> - 3.1-1
 - New upstream release 3.1 (rfbz #4528 #4429)
 
