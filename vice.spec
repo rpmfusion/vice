@@ -1,6 +1,6 @@
 Name:           vice
 Version:        3.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -43,6 +43,7 @@ BuildRequires:  flex
 BuildRequires:  gettext
 BuildRequires:  info
 BuildRequires:  desktop-file-utils
+BuildRequires:  perl
 BuildRequires:  xa
 BuildRequires:  xorg-x11-font-utils
 BuildRequires:  libappstream-glib
@@ -157,9 +158,7 @@ cp -a %{name}-%{version}.gtk %{name}-%{version}.sdl
 
 %build
 
-# --enable-external-ffmpeg currently broken with ffmpeg 4.0.1
-# nls was removed in svn trunk, all translations are outdated and thus not very useful
-COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch --disable-static-ffmpeg --disable-shared-ffmpeg --disable-external-ffmpeg --disable-nls"
+COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch --disable-static-ffmpeg --enable-external-ffmpeg"
 
 # workaround needed to fix incorrect toolchain check in configure script
 export toolchain_check=no
@@ -167,7 +166,7 @@ export CC=gcc
 export CXX=g++
 
 pushd %{name}-%{version}.gtk
-  %configure --enable-native-gtk3ui --enable-fullscreen $COMMON_FLAGS
+  %configure --enable-native-gtk3ui $COMMON_FLAGS
   # Ensure the system versions of these are used
   rm -r src/lib/lib* src/lib/ffmpeg
   %make_build

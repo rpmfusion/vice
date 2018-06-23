@@ -1,6 +1,6 @@
---- vice-3.2.orig/src/gfxoutputdrv/ffmpegdrv.c	2018-06-23 20:22:31.480540150 +0900
-+++ vice-3.2.new/src/gfxoutputdrv/ffmpegdrv.c	2018-06-23 20:22:38.905555451 +0900
-@@ -360,7 +360,7 @@ static int ffmpegdrv_open_audio(AVFormat
+--- vice.old/src/gfxoutputdrv/ffmpegdrv.c	2018-06-23 22:50:36.036856178 +0900
++++ vice.new/src/gfxoutputdrv/ffmpegdrv.c	2018-06-23 22:55:04.439272033 +0900
+@@ -354,7 +354,7 @@ static int ffmpegdrv_open_audio(AVFormat
      }
  
      audio_is_open = 1;
@@ -9,7 +9,7 @@
          audio_inbuf_samples = 10000;
      } else {
          audio_inbuf_samples = c->frame_size;
-@@ -454,7 +454,7 @@ static int ffmpegmovie_init_audio(int sp
+@@ -448,7 +448,7 @@ static int ffmpegmovie_init_audio(int sp
  
      /* Some formats want stream headers to be separate. */
      if (ffmpegdrv_oc->oformat->flags & AVFMT_GLOBALHEADER)
@@ -18,7 +18,7 @@
  
      /* create resampler context */
  #ifndef HAVE_FFMPEG_AVRESAMPLE
-@@ -787,7 +787,7 @@ static void ffmpegdrv_init_video(screens
+@@ -781,7 +781,7 @@ static void ffmpegdrv_init_video(screens
  
      /* Some formats want stream headers to be separate. */
      if (ffmpegdrv_oc->oformat->flags & AVFMT_GLOBALHEADER) {
@@ -27,3 +27,57 @@
      }
  
      if (audio_init_done) {
+@@ -961,37 +961,25 @@ static int ffmpegdrv_record(screenshot_t
+ 
+     video_st.frame->pts = video_st.next_pts++;
+ 
+-    if (ffmpegdrv_oc->oformat->flags & AVFMT_RAWPICTURE) {
+-        AVPacket pkt;
+-        VICE_P_AV_INIT_PACKET(&pkt);
+-        pkt.flags |= AV_PKT_FLAG_KEY;
+-        pkt.stream_index = video_st.st->index;
+-        pkt.data = (uint8_t*)video_st.frame;
+-        pkt.size = sizeof(AVPicture);
+-        pkt.pts = pkt.dts = video_st.frame->pts;
+-
+-        ret = VICE_P_AV_INTERLEAVED_WRITE_FRAME(ffmpegdrv_oc, &pkt);
+-    } else {
+-        AVPacket pkt = { 0 };
+-        int got_packet;
++    AVPacket pkt = { 0 };
++    int got_packet;
+ 
+-        VICE_P_AV_INIT_PACKET(&pkt);
++    VICE_P_AV_INIT_PACKET(&pkt);
+ 
+-        /* encode the image */
+-        ret = VICE_P_AVCODEC_ENCODE_VIDEO2(c, &pkt, video_st.frame, &got_packet);
+-        if (ret < 0) {
+-            log_debug("Error while encoding video frame");
+-            return -1;
+-        }
+-        /* if zero size, it means the image was buffered */
+-        if (got_packet) {
+-            if (write_frame(ffmpegdrv_oc, &c->time_base, video_st.st, &pkt)<0)
+-            {
+-                log_debug("ffmpegdrv_encode_audio: Error while writing audio frame");
+-            }
+-        } else {
+-            ret = 0;
++    /* encode the image */
++    ret = VICE_P_AVCODEC_ENCODE_VIDEO2(c, &pkt, video_st.frame, &got_packet);
++    if (ret < 0) {
++        log_debug("Error while encoding video frame");
++        return -1;
++    }
++    /* if zero size, it means the image was buffered */
++    if (got_packet) {
++        if (write_frame(ffmpegdrv_oc, &c->time_base, video_st.st, &pkt)<0)
++        {
++            log_debug("ffmpegdrv_encode_audio: Error while writing audio frame");
+         }
++    } else {
++        ret = 0;
+     }
+     if (ret < 0) {
+         log_debug("Error while writing video frame");
