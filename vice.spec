@@ -1,6 +1,6 @@
 Name:           vice
-Version:        3.1
-Release:        2%{?dist}
+Version:        3.2
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -24,30 +24,26 @@ Source15:       xvic.metainfo.xml
 Patch1:         vice-2.4.24-datadir.patch
 Patch2:         vice-htmlview.patch
 Patch3:         vice-norpath.patch
-BuildRequires:  libXt-devel
+Patch4:         vice-ffmpeg.patch
+BuildRequires:  SDL2-devel
+BuildRequires:  gtk3-devel
 BuildRequires:  libXext-devel
-BuildRequires:  libXxf86vm-devel
-BuildRequires:  libXxf86dga-devel
 BuildRequires:  libXrandr-devel
 BuildRequires:  giflib-devel
 BuildRequires:  libjpeg-devel
 BuildRequires:  libpng-devel
-BuildRequires:  libgnomeui-devel
-BuildRequires:  gtkglext-devel
-BuildRequires:  vte-devel
 BuildRequires:  ffmpeg-devel
+BuildRequires:  x264-devel
 BuildRequires:  lame-devel
 BuildRequires:  readline-devel
-BuildRequires:  SDL-devel
-BuildRequires:  alsa-lib-devel
 BuildRequires:  pulseaudio-libs-devel
-BuildRequires:  libieee1284-devel
 BuildRequires:  libpcap-devel
 BuildRequires:  bison
 BuildRequires:  flex
 BuildRequires:  gettext
 BuildRequires:  info
 BuildRequires:  desktop-file-utils
+BuildRequires:  xa
 BuildRequires:  xorg-x11-font-utils
 BuildRequires:  libappstream-glib
 
@@ -147,6 +143,7 @@ sed -i 's/\r//' `find -name "*.cc"`
 %patch1 -p1 -z .datadir
 %patch2 -p1 -z .htmlview
 %patch3 -p1 -z .norpath
+%patch4 -p1 -z .ffmpeg
 for i in man/*.1 doc/*.info* README AUTHORS; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
    touch -r $i $i.tmp
@@ -159,7 +156,10 @@ cp -a %{name}-%{version}.gtk %{name}-%{version}.sdl
 
 
 %build
-COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch"
+
+# --enable-external-ffmpeg currently broken with ffmpeg 4.0.1
+# nls was removed in svn trunk, all translations are outdated and thus not very useful
+COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch --disable-static-ffmpeg --disable-shared-ffmpeg --disable-external-ffmpeg --disable-nls"
 
 # workaround needed to fix incorrect toolchain check in configure script
 export toolchain_check=no
@@ -167,14 +167,14 @@ export CC=gcc
 export CXX=g++
 
 pushd %{name}-%{version}.gtk
-  %configure --enable-gnomeui --enable-fullscreen $COMMON_FLAGS
+  %configure --enable-native-gtk3ui --enable-fullscreen $COMMON_FLAGS
   # Ensure the system versions of these are used
   rm -r src/lib/lib* src/lib/ffmpeg
   %make_build
 popd
 
 pushd %{name}-%{version}.sdl
-  %configure --enable-sdlui $COMMON_FLAGS
+  %configure --enable-sdlui2 $COMMON_FLAGS
   # Ensure the system versions of these are used
   rm -r src/lib/lib* src/lib/ffmpeg
   %make_build
@@ -199,7 +199,6 @@ pushd %{name}-%{version}.sdl
   popd
 popd
 
-%find_lang %{name}
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 # for some reason make install drops a .txt and .pdf in the infodir ... ?
 rm -f $RPM_BUILD_ROOT%{_infodir}/%{name}.txt*
@@ -260,7 +259,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %files
 
-%files common -f %{name}.lang
+%files common
 %doc %{name}-%{version}.gtk/AUTHORS %{name}-%{version}.gtk/ChangeLog
 %doc %{name}-%{version}.gtk/FEEDBACK %{name}-%{version}.gtk/README
 %doc %{name}-%{version}.gtk/doc/iec-bus.txt
@@ -311,6 +310,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Sat Jun 23 2018 Bernie Innocenti <bernie@codewiz.org> - 3.2-2
+- New upstream release 3.2 (rfbz #4950)
+
 * Fri Mar 02 2018 RPM Fusion Release Engineering <leigh123linux@googlemail.com> - 3.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 

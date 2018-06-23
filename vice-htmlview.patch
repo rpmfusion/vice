@@ -1,8 +1,8 @@
 diff -ru vice-2.4.24.orig/src/arch/unix/x11/ui-resources.c vice-2.4.24.new/src/arch/unix/x11/ui-resources.c
 --- vice-2.4.24.orig/src/arch/unix/x11/ui-resources.c	2015-07-26 18:00:51.000000000 +0200
 +++ vice-2.4.24.new/src/arch/unix/x11/ui-resources.c	2016-01-30 16:41:47.478138264 +0100
-@@ -172,7 +172,7 @@
- #ifdef MACOSX_SUPPORT    
+@@ -183,7 +183,7 @@
+ #ifdef MACOSX_SUPPORT
  #define HTML_BROWSER_COMMAND_DEFAULT "/usr/bin/open %s"
  #else
 -#define HTML_BROWSER_COMMAND_DEFAULT "firefox %s"
