@@ -1,6 +1,6 @@
 Name:           vice
 Version:        3.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -25,6 +25,7 @@ Patch1:         vice-2.4.24-datadir.patch
 Patch2:         vice-htmlview.patch
 Patch3:         vice-norpath.patch
 Patch4:         vice-ffmpeg.patch
+Patch5:         vice-soundsdl-swab.patch
 BuildRequires:  SDL2-devel
 BuildRequires:  gtk3-devel
 BuildRequires:  libXext-devel
@@ -54,6 +55,8 @@ Requires:       %{name}-xcbm-ii = %{version}-%{release}
 Requires:       %{name}-xpet = %{version}-%{release}
 Requires:       %{name}-xplus4 = %{version}-%{release}
 Requires:       %{name}-xvic = %{version}-%{release}
+
+ExcludeArch: ppc64
 
 %description
 An emulator for a variety of Commodore 8bit machines, including the C16, C64,
@@ -145,6 +148,7 @@ sed -i 's/\r//' `find -name "*.cc"`
 %patch2 -p1 -z .htmlview
 %patch3 -p1 -z .norpath
 %patch4 -p1 -z .ffmpeg
+%patch5 -p1 -z .swab
 for i in man/*.1 doc/*.info* README AUTHORS; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
    touch -r $i $i.tmp
@@ -309,8 +313,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
-* Sat Jun 23 2018 Bernie Innocenti <bernie@codewiz.org> - 3.2-2
+* Sat Jun 23 2018 Bernie Innocenti <bernie@codewiz.org> - 3.2-3
 - New upstream release 3.2 (rfbz #4950)
+- Disabled building on ppc64 due to a compiler error in soundsdl.c:231
 
 * Fri Mar 02 2018 RPM Fusion Release Engineering <leigh123linux@googlemail.com> - 3.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
