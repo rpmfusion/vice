@@ -25,27 +25,22 @@ Patch1:         vice-2.4.24-datadir.patch
 Patch2:         vice-htmlview.patch
 Patch3:         vice-norpath.patch
 Patch4:         vice-new-ffmpeg.patch
-BuildRequires:  libXt-devel
+BuildRequires:  gtk3-devel
+BuildRequires:  SDL2-devel
 BuildRequires:  libXext-devel
-BuildRequires:  libXxf86vm-devel
-BuildRequires:  libXxf86dga-devel
 BuildRequires:  libXrandr-devel
 BuildRequires:  giflib-devel
 BuildRequires:  libjpeg-devel
 BuildRequires:  libpng-devel
-BuildRequires:  libgnomeui-devel
-BuildRequires:  gtkglext-devel
-BuildRequires:  vte-devel
 BuildRequires:  ffmpeg-devel
+BuildRequires:  x264-devel
 BuildRequires:  lame-devel
 BuildRequires:  readline-devel
-BuildRequires:  SDL-devel
-BuildRequires:  alsa-lib-devel
 BuildRequires:  pulseaudio-libs-devel
-BuildRequires:  libieee1284-devel
 BuildRequires:  libpcap-devel
 BuildRequires:  bison
 BuildRequires:  flex
+BuildRequires:  perl
 BuildRequires:  gettext
 BuildRequires:  info
 BuildRequires:  xa
@@ -169,15 +164,19 @@ export toolchain_check=no
 export CC=gcc
 export CXX=g++
 
+# Some of the code uses GNU / XOPEN libc extensions
+export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
+export CXXFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
+
 pushd %{name}-%{version}.gtk
-  %configure --enable-gnomeui --enable-fullscreen $COMMON_FLAGS
+  %configure --enable-native-gtk3ui $COMMON_FLAGS
   # Ensure the system versions of these are used
   rm -r src/lib/lib* src/lib/ffmpeg
   %make_build
 popd
 
 pushd %{name}-%{version}.sdl
-  %configure --enable-sdlui $COMMON_FLAGS
+  %configure --enable-sdlui2 $COMMON_FLAGS
   # Ensure the system versions of these are used
   rm -r src/lib/lib* src/lib/ffmpeg
   %make_build
@@ -202,7 +201,8 @@ pushd %{name}-%{version}.sdl
   popd
 popd
 
-%find_lang %{name}
+#find_lang %%{name}
+
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
 # for some reason make install drops a .txt and .pdf in the infodir ... ?
 rm -f $RPM_BUILD_ROOT%{_infodir}/%{name}.txt*
@@ -263,7 +263,7 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %files
 
-%files common -f %{name}.lang
+%files common
 %doc %{name}-%{version}.gtk/AUTHORS %{name}-%{version}.gtk/ChangeLog
 %doc %{name}-%{version}.gtk/FEEDBACK %{name}-%{version}.gtk/README
 %doc %{name}-%{version}.gtk/doc/iec-bus.txt
@@ -316,6 +316,8 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 %changelog
 * Thu Jun 28 2018 Hans de Goede <j.w.r.degoede@gmail.com> - 3.2-1
 - New upstream release 3.2 (rfbz #4950)
+- Use new GTK3 UI instead of GTK2 (Bernie Innocenti)
+- Use SDL2 instead of SDL for .sdl versions (Bernie Innocenti)
 
 * Fri Mar 02 2018 RPM Fusion Release Engineering <leigh123linux@googlemail.com> - 3.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
