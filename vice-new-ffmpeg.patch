@@ -1,0 +1,49 @@
+diff -up vice-3.2.gtk/src/gfxoutputdrv/ffmpegdrv.c.ffmpeg vice-3.2.gtk/src/gfxoutputdrv/ffmpegdrv.c
+--- vice-3.2.gtk/src/gfxoutputdrv/ffmpegdrv.c.ffmpeg	2018-06-28 17:11:46.602748172 +0200
++++ vice-3.2.gtk/src/gfxoutputdrv/ffmpegdrv.c	2018-06-28 17:17:10.132040705 +0200
+@@ -360,7 +360,7 @@ static int ffmpegdrv_open_audio(AVFormat
+     }
+ 
+     audio_is_open = 1;
+-    if (c->codec->capabilities & CODEC_CAP_VARIABLE_FRAME_SIZE) {
++    if (c->codec->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE) {
+         audio_inbuf_samples = 10000;
+     } else {
+         audio_inbuf_samples = c->frame_size;
+@@ -454,7 +454,7 @@ static int ffmpegmovie_init_audio(int sp
+ 
+     /* Some formats want stream headers to be separate. */
+     if (ffmpegdrv_oc->oformat->flags & AVFMT_GLOBALHEADER)
+-        c->flags |= CODEC_FLAG_GLOBAL_HEADER;
++        c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+ 
+     /* create resampler context */
+ #ifndef HAVE_FFMPEG_AVRESAMPLE
+@@ -787,7 +787,7 @@ static void ffmpegdrv_init_video(screens
+ 
+     /* Some formats want stream headers to be separate. */
+     if (ffmpegdrv_oc->oformat->flags & AVFMT_GLOBALHEADER) {
+-        c->flags |= CODEC_FLAG_GLOBAL_HEADER;
++        c->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+     }
+ 
+     if (audio_init_done) {
+@@ -967,17 +967,7 @@ static int ffmpegdrv_record(screenshot_t
+ 
+     video_st.frame->pts = video_st.next_pts++;
+ 
+-    if (ffmpegdrv_oc->oformat->flags & AVFMT_RAWPICTURE) {
+-        AVPacket pkt;
+-        VICE_P_AV_INIT_PACKET(&pkt);
+-        pkt.flags |= AV_PKT_FLAG_KEY;
+-        pkt.stream_index = video_st.st->index;
+-        pkt.data = (uint8_t*)video_st.frame;
+-        pkt.size = sizeof(AVPicture);
+-        pkt.pts = pkt.dts = video_st.frame->pts;
+-
+-        ret = VICE_P_AV_INTERLEAVED_WRITE_FRAME(ffmpegdrv_oc, &pkt);
+-    } else {
++    {
+         AVPacket pkt = { 0 };
+         int got_packet;
+ 

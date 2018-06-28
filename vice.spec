@@ -1,6 +1,6 @@
 Name:           vice
-Version:        3.1
-Release:        2%{?dist}
+Version:        3.2
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -24,6 +24,7 @@ Source15:       xvic.metainfo.xml
 Patch1:         vice-2.4.24-datadir.patch
 Patch2:         vice-htmlview.patch
 Patch3:         vice-norpath.patch
+Patch4:         vice-new-ffmpeg.patch
 BuildRequires:  libXt-devel
 BuildRequires:  libXext-devel
 BuildRequires:  libXxf86vm-devel
@@ -47,6 +48,7 @@ BuildRequires:  bison
 BuildRequires:  flex
 BuildRequires:  gettext
 BuildRequires:  info
+BuildRequires:  xa
 BuildRequires:  desktop-file-utils
 BuildRequires:  xorg-x11-font-utils
 BuildRequires:  libappstream-glib
@@ -147,6 +149,7 @@ sed -i 's/\r//' `find -name "*.cc"`
 %patch1 -p1 -z .datadir
 %patch2 -p1 -z .htmlview
 %patch3 -p1 -z .norpath
+%patch4 -p1 -z .ffmpeg
 for i in man/*.1 doc/*.info* README AUTHORS; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
    touch -r $i $i.tmp
@@ -159,7 +162,7 @@ cp -a %{name}-%{version}.gtk %{name}-%{version}.sdl
 
 
 %build
-COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch"
+COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch --enable-external-ffmpeg"
 
 # workaround needed to fix incorrect toolchain check in configure script
 export toolchain_check=no
@@ -311,6 +314,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Thu Jun 28 2018 Hans de Goede <j.w.r.degoede@gmail.com> - 3.2-1
+- New upstream release 3.2 (rfbz #4950)
+
 * Fri Mar 02 2018 RPM Fusion Release Engineering <leigh123linux@googlemail.com> - 3.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
