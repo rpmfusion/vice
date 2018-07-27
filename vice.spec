@@ -1,6 +1,6 @@
 Name:           vice
 Version:        3.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -314,6 +314,9 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Fri Jul 27 2018 RPM Fusion Release Engineering <sergio@serjux.com> - 3.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
 * Thu Jun 28 2018 Hans de Goede <j.w.r.degoede@gmail.com> - 3.2-1
 - New upstream release 3.2 (rfbz #4950)
 - Use new GTK3 UI instead of GTK2 (Bernie Innocenti)
