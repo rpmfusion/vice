@@ -1,3 +1,5 @@
+%define _legacy_common_support 1
+
 Name:           vice
 Version:        3.2
 Release:        6%{?dist}
