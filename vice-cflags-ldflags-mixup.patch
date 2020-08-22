@@ -1,0 +1,14 @@
+Patch configure.proto to not use its own CFLAGS with our LDFLAGS when checking
+time_t size, this results in a compilation error building the test.
+Note we patch configure.proto as configure.ac gets generated from that.
+diff -up vice-3.4.gtk/configure.proto~ vice-3.4.gtk/configure.proto
+--- vice-3.4.gtk/configure.proto~	2020-08-22 16:39:21.000000000 +0200
++++ vice-3.4.gtk/configure.proto	2020-08-22 16:45:20.070343974 +0200
+@@ -429,7 +429,6 @@ fi
+ 
+ 
+ old_CFLAGS="$CFLAGS"
+-CFLAGS="$VICE_CFLAGS"
+ dnl Do these checks before any Gtk3 flags are added
+ AC_MSG_CHECKING(for time_t in time.h)
+ AC_CACHE_VAL(bu_cv_decl_time_t_time_h,

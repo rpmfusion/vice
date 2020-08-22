@@ -1,8 +1,8 @@
 %define _legacy_common_support 1
 
 Name:           vice
-Version:        3.2
-Release:        7%{?dist}
+Version:        3.4
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -23,10 +23,8 @@ Source12:       xcbm-ii.metainfo.xml
 Source13:       xpet.metainfo.xml
 Source14:       xplus4.metainfo.xml
 Source15:       xvic.metainfo.xml
-Patch1:         vice-2.4.24-datadir.patch
-Patch2:         vice-htmlview.patch
-Patch3:         vice-norpath.patch
-Patch4:         vice-new-ffmpeg.patch
+Patch1:         vice-datadir.patch
+Patch2:         vice-cflags-ldflags-mixup.patch
 BuildRequires:  gtk3-devel
 BuildRequires:  SDL2-devel
 BuildRequires:  libXext-devel
@@ -37,6 +35,8 @@ BuildRequires:  libpng-devel
 BuildRequires:  ffmpeg-devel
 BuildRequires:  x264-devel
 BuildRequires:  lame-devel
+BuildRequires:  flac-devel
+BuildRequires:  mpg123-devel
 BuildRequires:  readline-devel
 BuildRequires:  pulseaudio-libs-devel
 BuildRequires:  libpcap-devel
@@ -49,6 +49,7 @@ BuildRequires:  xa
 BuildRequires:  desktop-file-utils
 BuildRequires:  xorg-x11-font-utils
 BuildRequires:  libappstream-glib
+BuildRequires:  gcc-c++ automake
 
 Requires:       %{name}-x64 = %{version}-%{release}
 Requires:       %{name}-x128 = %{version}-%{release}
@@ -144,14 +145,13 @@ sed -i 's/\r//' `find -name "*.h"`
 sed -i 's/\r//' `find -name "*.c"`
 sed -i 's/\r//' `find -name "*.cc"`
 %patch1 -p1 -z .datadir
-%patch2 -p1 -z .htmlview
-%patch3 -p1 -z .norpath
-%patch4 -p1 -z .ffmpeg
+%patch2 -p1
 for i in man/*.1 doc/*.info* README AUTHORS; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
    touch -r $i $i.tmp
    mv $i.tmp $i
 done
+./autogen.sh
 popd
 
 mv %{name}-%{version} %{name}-%{version}.gtk
@@ -159,12 +159,16 @@ cp -a %{name}-%{version}.gtk %{name}-%{version}.sdl
 
 
 %build
-COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch --enable-external-ffmpeg"
+# The build fails with linking errors when enabling LTO.
+# The build fails because of the .a archives from ARCH_LIBS being passed on the
+# cmdline twice. Fixing this leads to errors about undefined symbols because
+# the various .a archives from ARCH_LIBS have interdependencies in 2 directions,
+# so there is no working order in which they can be passed which resolves all
+# symbols in one go. Passing ARCH_LIBS twice, as the upstream Makefile does
+# works around this, but this breaks LTO. So lets just disable LTO for now.
+%define _lto_cflags %{nil}
 
-# workaround needed to fix incorrect toolchain check in configure script
-export toolchain_check=no
-export CC=gcc
-export CXX=g++
+COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch --enable-external-ffmpeg"
 
 # Some of the code uses GNU / XOPEN libc extensions
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
@@ -203,16 +207,25 @@ pushd %{name}-%{version}.sdl
   popd
 popd
 
-#find_lang %%{name}
+rm $RPM_BUILD_ROOT%{_infodir}/dir
 
-rm -f $RPM_BUILD_ROOT%{_infodir}/dir
-# for some reason make install drops a .txt and .pdf in the infodir ... ?
-rm -f $RPM_BUILD_ROOT%{_infodir}/%{name}.txt*
-rm -f $RPM_BUILD_ROOT%{_infodir}/%{name}.pdf*
-# vice installs its docs under /usr/share/vice/doc, we install them ourselves
-# with %%doc, so nuke vice's install and create a symlink for the help function
-rm -rf $RPM_BUILD_ROOT%{_datadir}/%{name}/doc
-ln -s ../doc/%{name}-%{version} $RPM_BUILD_ROOT%{_datadir}/%{name}/doc
+# vice installs a bunch of docs under /usr/share/doc/vice which are not really
+# end user oriented. Remove these.
+rm $RPM_BUILD_ROOT%{_docdir}/%{name}/*.txt
+rm $RPM_BUILD_ROOT%{_docdir}/%{name}/COPYING
+rm $RPM_BUILD_ROOT%{_docdir}/%{name}/GTK3-*.md
+rm $RPM_BUILD_ROOT%{_docdir}/%{name}/Lato-*
+
+# Fixup wrongly installed images for the html-docs
+mkdir $RPM_BUILD_ROOT%{_docdir}/%{name}/images
+mv $RPM_BUILD_ROOT%{_docdir}/%{name}/{*.png,*.gif,*.svg} \
+  $RPM_BUILD_ROOT%{_docdir}/%{name}/images
+
+# For the manual entry in the help menu
+install -p -m 644 %{name}-%{version}.gtk/doc/%{name}.pdf \
+  $RPM_BUILD_ROOT%{_docdir}/%{name}
+ln -s ../doc/%{name} $RPM_BUILD_ROOT%{_datadir}/%{name}/doc
+
 # for use of the -data package with libsidplay bases sid players
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/sidplayfp
 for i in basic chargen kernal; do
@@ -244,33 +257,11 @@ for i in */apps/*icon.png; do mv $i `echo $i|sed s/icon//`; done
 popd
 
 
-%post common
-/sbin/install-info %{_infodir}/%{name}.info %{_infodir}/dir || :
-touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
-
-%preun common
-if [ "$1" = 0 ]; then
-    /sbin/install-info --delete %{_infodir}/%{name}.info %{_infodir}/dir || :
-fi
-
-%postun common
-if [ $1 -eq 0 ] ; then
-    touch --no-create %{_datadir}/icons/hicolor &>/dev/null
-    gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
-fi
-
-%posttrans common
-gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
-
-
 %files
 
 %files common
-%doc %{name}-%{version}.gtk/AUTHORS %{name}-%{version}.gtk/ChangeLog
-%doc %{name}-%{version}.gtk/FEEDBACK %{name}-%{version}.gtk/README
-%doc %{name}-%{version}.gtk/doc/iec-bus.txt
-%doc %{name}-%{version}.gtk/doc/html/*.html
-%doc %{name}-%{version}.gtk/doc/html/images
+%doc %{_docdir}/%{name}
+%license %{name}-%{version}.gtk/COPYING
 %{_bindir}/c1541
 %{_bindir}/cartconv
 %{_bindir}/petcat
@@ -316,6 +307,11 @@ gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 
 %changelog
+* Sat Aug 22 2020 Hans de Goede <j.w.r.degoede@gmail.com> - 3.4-1
+- New upstream release 3.4
+- Fix Fedora 33 FTBFS
+- Remove obsolete gtk-icon-cache and instlal-info scriptlets
+
 * Wed Aug 19 2020 RPM Fusion Release Engineering <leigh123linux@gmail.com> - 3.2-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=X64 (Vice)
 Comment=Commodore 64 Emulator
-Exec=x64
+Exec=x64sc
 Icon=c64
 Terminal=false
 StartupNotify=true
