@@ -29,6 +29,8 @@ BuildRequires:  gtk3-devel
 BuildRequires:  SDL2-devel
 BuildRequires:  libXext-devel
 BuildRequires:  libXrandr-devel
+BuildRequires:  libGL-devel
+BuildRequires:  glew-devel
 BuildRequires:  giflib-devel
 BuildRequires:  libjpeg-devel
 BuildRequires:  libpng-devel
@@ -37,14 +39,19 @@ BuildRequires:  x264-devel
 BuildRequires:  lame-devel
 BuildRequires:  flac-devel
 BuildRequires:  mpg123-devel
+BuildRequires:  libvorbis-devel
 BuildRequires:  readline-devel
+BuildRequires:  alsa-lib-devel
 BuildRequires:  pulseaudio-libs-devel
 BuildRequires:  libpcap-devel
+BuildRequires:  libieee1284-devel
+BuildRequires:  pciutils-devel
 BuildRequires:  bison
 BuildRequires:  flex
 BuildRequires:  perl
 BuildRequires:  gettext
 BuildRequires:  info
+BuildRequires:  texinfo
 BuildRequires:  xa
 BuildRequires:  desktop-file-utils
 BuildRequires:  xorg-x11-font-utils
@@ -163,7 +170,7 @@ mv doc/%{name}.pdf .
 # works around this, but this breaks LTO. So lets just disable LTO for now.
 %define _lto_cflags %{nil}
 
-COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch --enable-external-ffmpeg"
+COMMON_FLAGS="--enable-ethernet --enable-parsid --enable-libieee1284 --without-oss --disable-arch --enable-external-ffmpeg"
 
 # Some of the code uses GNU / XOPEN libc extensions
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
