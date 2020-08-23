@@ -139,23 +139,18 @@ Vice Commodore VIC-20 Emulator.
 
 
 %prep
-%setup -c -q
-pushd %{name}-%{version}
+%autosetup -p1
 sed -i 's/\r//' `find -name "*.h"`
 sed -i 's/\r//' `find -name "*.c"`
 sed -i 's/\r//' `find -name "*.cc"`
-%patch1 -p1 -z .datadir
-%patch2 -p1
 for i in man/*.1 doc/*.info* README AUTHORS; do
    iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
    touch -r $i $i.tmp
    mv $i.tmp $i
 done
+# Avoid "make distclean" removing this, as we need it
+mv doc/%{name}.pdf .
 ./autogen.sh
-popd
-
-mv %{name}-%{version} %{name}-%{version}.gtk
-cp -a %{name}-%{version}.gtk %{name}-%{version}.sdl
 
 
 %build
@@ -174,37 +169,38 @@ COMMON_FLAGS="--enable-ethernet --enable-parsid --without-oss --disable-arch --e
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
 export CXXFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
 
-pushd %{name}-%{version}.gtk
-  %configure --enable-native-gtk3ui $COMMON_FLAGS
-  # Ensure the system versions of these are used
-  rm -r src/lib/lib* src/lib/ffmpeg
-  %make_build
-popd
+# Build SDL version
+%configure --enable-sdlui2 $COMMON_FLAGS
+# Ensure the system versions of these are used
+mkdir src/lib/bak
+mv src/lib/lib* src/lib/ffmpeg src/lib/bak
+%make_build
+# Rename / save SDL binaries
+for i in src/x*; do
+   mv $i $i.sdl
+done
 
-pushd %{name}-%{version}.sdl
-  %configure --enable-sdlui2 $COMMON_FLAGS
-  # Ensure the system versions of these are used
-  rm -r src/lib/lib* src/lib/ffmpeg
-  %make_build
-popd
+# Reset source tree for building GTK version
+mv src/lib/bak/* src/lib
+make distclean
+
+# Build GTK version
+%configure --enable-native-gtk3ui $COMMON_FLAGS
+# Ensure the system versions of these are used
+rm -r src/lib/lib* src/lib/ffmpeg
+%make_build
 
 
 %install
-pushd %{name}-%{version}.gtk
 %make_install VICEDIR=%{_datadir}/%{name}
-popd
-
-pushd %{name}-%{version}.sdl
-  pushd src
-    for i in x*; do
-      install -p -m 755 $i $RPM_BUILD_ROOT%{_bindir}/$i.sdl
-    done
-  popd
-  pushd data
-    for i in */sdl_sym.vkm; do
-      cp -a --parents $i $RPM_BUILD_ROOT%{_datadir}/%{name}
-    done
-  popd
+# Manual install SDL version
+for i in src/x*.sdl; do
+  install -p -m 755 $i $RPM_BUILD_ROOT%{_bindir}
+done
+pushd data
+  for i in */sdl_sym.vkm; do
+    cp -a --parents $i $RPM_BUILD_ROOT%{_datadir}/%{name}
+  done
 popd
 
 rm $RPM_BUILD_ROOT%{_infodir}/dir
@@ -222,8 +218,7 @@ mv $RPM_BUILD_ROOT%{_docdir}/%{name}/{*.png,*.gif,*.svg} \
   $RPM_BUILD_ROOT%{_docdir}/%{name}/images
 
 # For the manual entry in the help menu
-install -p -m 644 %{name}-%{version}.gtk/doc/%{name}.pdf \
-  $RPM_BUILD_ROOT%{_docdir}/%{name}
+install -p -m 644 %{name}.pdf $RPM_BUILD_ROOT%{_docdir}/%{name}
 ln -s ../doc/%{name} $RPM_BUILD_ROOT%{_datadir}/%{name}/doc
 
 # for use of the -data package with libsidplay bases sid players
@@ -261,7 +256,7 @@ popd
 
 %files common
 %doc %{_docdir}/%{name}
-%license %{name}-%{version}.gtk/COPYING
+%license COPYING
 %{_bindir}/c1541
 %{_bindir}/cartconv
 %{_bindir}/petcat
