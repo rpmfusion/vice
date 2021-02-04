@@ -2,7 +2,7 @@
 
 Name:           vice
 Version:        3.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -309,6 +309,9 @@ popd
 
 
 %changelog
+* Thu Feb 04 2021 RPM Fusion Release Engineering <leigh123linux@gmail.com> - 3.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
 * Sat Aug 22 2020 Hans de Goede <j.w.r.degoede@gmail.com> - 3.4-1
 - New upstream release 3.4
 - Fix Fedora 33 FTBFS
