@@ -1,40 +1,36 @@
 %define _legacy_common_support 1
 
 Name:           vice
-Version:        3.4
-Release:        4%{?dist}
+Version:        3.6.1
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
 URL:            http://vice-emu.sourceforge.net/
 Source0:        http://downloads.sourceforge.net/vice-emu/%{name}-%{version}.tar.gz
-Source1:        x128.desktop
-Source2:        x64.desktop
-Source3:        xcbm-ii.desktop
-Source4:        xpet.desktop
-Source5:        xplus4.desktop
-Source6:        xvic.desktop
-Source7:        vice-miniicons.tar.bz2
-Source8:        vice-normalicons.tar.bz2
-Source9:        vice-largeicons.tar.bz2
-Source10:       x64.appdata.xml
-Source11:       x128.metainfo.xml
-Source12:       xcbm-ii.metainfo.xml
-Source13:       xpet.metainfo.xml
-Source14:       xplus4.metainfo.xml
-Source15:       xvic.metainfo.xml
-Patch1:         vice-datadir.patch
-Patch2:         vice-cflags-ldflags-mixup.patch
+Source1:        x64.appdata.xml
+Source2:        x128.metainfo.xml
+Source3:        xcbm-ii.metainfo.xml
+Source4:        xpet.metainfo.xml
+Source5:        xplus4.metainfo.xml
+Source6:        xvic.metainfo.xml
+Patch0:         vice-cflags-ldflags-mixup.patch
+
+BuildRequires:  gcc-c++
+BuildRequires:  automake
 BuildRequires:  gtk3-devel
 BuildRequires:  SDL2-devel
+BuildRequires:  SDL2_image-devel
 BuildRequires:  libXext-devel
 BuildRequires:  libXrandr-devel
 BuildRequires:  libGL-devel
 BuildRequires:  glew-devel
-BuildRequires:  giflib-devel
 BuildRequires:  libjpeg-devel
 BuildRequires:  libpng-devel
+# The video recording code does not work with the new ffmpeg in F36
+%if 0%{?fedora} < 36
 BuildRequires:  ffmpeg-devel
+%endif
 BuildRequires:  x264-devel
 BuildRequires:  lame-devel
 BuildRequires:  flac-devel
@@ -52,11 +48,13 @@ BuildRequires:  perl
 BuildRequires:  gettext
 BuildRequires:  info
 BuildRequires:  texinfo
+BuildRequires:  texinfo-tex
 BuildRequires:  xa
+BuildRequires:  dos2unix
+BuildRequires:  xdg-utils
 BuildRequires:  desktop-file-utils
 BuildRequires:  xorg-x11-font-utils
 BuildRequires:  libappstream-glib
-BuildRequires:  gcc-c++ automake
 
 Requires:       %{name}-x64 = %{version}-%{release}
 Requires:       %{name}-x128 = %{version}-%{release}
@@ -93,8 +91,9 @@ based sid music players.
 
 %package        x64
 Summary:        Vice Commodore 64 Emulator
-Provides:       %{name}-engine
+Provides:       %{name}-engine = %{version}-%{release}
 Requires:       %{name}-common = %{version}-%{release}
+Requires:       hicolor-icon-theme
 
 %description    x64
 Vice Commodore 64 Emulator.
@@ -102,8 +101,9 @@ Vice Commodore 64 Emulator.
 
 %package        x128
 Summary:        Vice Commodore 128 Emulator
-Provides:       %{name}-engine
+Provides:       %{name}-engine = %{version}-%{release}
 Requires:       %{name}-common = %{version}-%{release}
+Requires:       hicolor-icon-theme
 
 %description    x128
 Vice Commodore 128 Emulator.
@@ -111,8 +111,9 @@ Vice Commodore 128 Emulator.
 
 %package        xcbm-ii
 Summary:        Vice CBM-II (C610) Emulator
-Provides:       %{name}-engine
+Provides:       %{name}-engine = %{version}-%{release}
 Requires:       %{name}-common = %{version}-%{release}
+Requires:       hicolor-icon-theme
 
 %description    xcbm-ii
 Vice CBM-II (C610) Emulator.
@@ -120,8 +121,9 @@ Vice CBM-II (C610) Emulator.
 
 %package        xpet
 Summary:        Vice Commodore PET Emulator
-Provides:       %{name}-engine
+Provides:       %{name}-engine = %{version}-%{release}
 Requires:       %{name}-common = %{version}-%{release}
+Requires:       hicolor-icon-theme
 
 %description    xpet
 Vice Commodore PET Emulator.
@@ -129,8 +131,9 @@ Vice Commodore PET Emulator.
 
 %package        xplus4
 Summary:        Vice Commodore Plus-4 Emulator
-Provides:       %{name}-engine
+Provides:       %{name}-engine = %{version}-%{release}
 Requires:       %{name}-common = %{version}-%{release}
+Requires:       hicolor-icon-theme
 
 %description    xplus4
 Vice Commodore Plus-4 Emulator.
@@ -138,8 +141,9 @@ Vice Commodore Plus-4 Emulator.
 
 %package        xvic
 Summary:        Vice Commodore VIC-20 Emulator
-Provides:       %{name}-engine
+Provides:       %{name}-engine = %{version}-%{release}
 Requires:       %{name}-common = %{version}-%{release}
+Requires:       hicolor-icon-theme
 
 %description    xvic
 Vice Commodore VIC-20 Emulator.
@@ -150,14 +154,11 @@ Vice Commodore VIC-20 Emulator.
 sed -i 's/\r//' `find -name "*.h"`
 sed -i 's/\r//' `find -name "*.c"`
 sed -i 's/\r//' `find -name "*.cc"`
-for i in man/*.1 doc/*.info* README AUTHORS; do
-   iconv -f ISO-8859-1 -t UTF8 $i > $i.tmp
-   touch -r $i $i.tmp
-   mv $i.tmp $i
-done
-# Avoid "make distclean" removing this, as we need it
-mv doc/%{name}.pdf .
 ./autogen.sh
+
+# Fix desktop file generation
+sed -i "s/\([a-zA-Z0-9]*\)_[0-9]*\.svg/\1/" \
+  src/arch/gtk3/data/unix/Makefile.am
 
 
 %build
@@ -170,7 +171,13 @@ mv doc/%{name}.pdf .
 # works around this, but this breaks LTO. So lets just disable LTO for now.
 %define _lto_cflags %{nil}
 
-COMMON_FLAGS="--enable-ethernet --enable-parsid --enable-libieee1284 --without-oss --disable-arch --enable-external-ffmpeg"
+# The video recording code does not work with the new ffmpeg in F36
+# https://sourceforge.net/p/vice-emu/bugs/1697/
+%if 0%{?fedora} >= 36
+COMMON_FLAGS="--enable-x64 --enable-ethernet --enable-libieee1284 --disable-arch --enable-lame --with-mpg123 --with-flac --with-vorbis --with-jpeg"
+%else
+COMMON_FLAGS="--enable-x64 --enable-ethernet --enable-libieee1284 --disable-arch --enable-external-ffmpeg --enable-lame --with-mpg123 --with-flac --with-vorbis --with-jpeg"
+%endif
 
 # Some of the code uses GNU / XOPEN libc extensions
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
@@ -178,9 +185,6 @@ export CXXFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
 
 # Build SDL version
 %configure --enable-sdlui2 $COMMON_FLAGS
-# Ensure the system versions of these are used
-mkdir src/lib/bak
-mv src/lib/lib* src/lib/ffmpeg src/lib/bak
 %make_build
 # Rename / save SDL binaries
 for i in src/x*; do
@@ -188,18 +192,17 @@ for i in src/x*; do
 done
 
 # Reset source tree for building GTK version
-mv src/lib/bak/* src/lib
 make distclean
 
 # Build GTK version
-%configure --enable-native-gtk3ui $COMMON_FLAGS
-# Ensure the system versions of these are used
-rm -r src/lib/lib* src/lib/ffmpeg
+%configure --enable-native-gtk3ui --enable-desktop-files $COMMON_FLAGS
 %make_build
 
 
 %install
-%make_install VICEDIR=%{_datadir}/%{name}
+# Avoid the Makefiles .desktop file install as that installs them into
+# $HOME/.local/share/applications
+%make_install XDG_DESKTOP_MENU=/usr/bin/true
 # Manual install SDL version
 for i in src/x*.sdl; do
   install -p -m 755 $i $RPM_BUILD_ROOT%{_bindir}
@@ -209,24 +212,17 @@ pushd data
     cp -a --parents $i $RPM_BUILD_ROOT%{_datadir}/%{name}
   done
 popd
-
-rm $RPM_BUILD_ROOT%{_infodir}/dir
+# We cannot do this in %%prep because the autogen code for infocontrib.h expects
+# vice.texi to still be in ISO-8859-15
+FILE=$RPM_BUILD_ROOT%{_docdir}/%{name}/vice.texi
+iconv -f ISO-8859-15 -t UTF8 $FILE > $FILE.tmp
+touch -r $FILE $FILE.tmp
+mv $FILE.tmp $FILE
 
 # vice installs a bunch of docs under /usr/share/doc/vice which are not really
 # end user oriented. Remove these.
 rm $RPM_BUILD_ROOT%{_docdir}/%{name}/*.txt
-rm $RPM_BUILD_ROOT%{_docdir}/%{name}/COPYING
 rm $RPM_BUILD_ROOT%{_docdir}/%{name}/GTK3-*.md
-rm $RPM_BUILD_ROOT%{_docdir}/%{name}/Lato-*
-
-# Fixup wrongly installed images for the html-docs
-mkdir $RPM_BUILD_ROOT%{_docdir}/%{name}/images
-mv $RPM_BUILD_ROOT%{_docdir}/%{name}/{*.png,*.gif,*.svg} \
-  $RPM_BUILD_ROOT%{_docdir}/%{name}/images
-
-# For the manual entry in the help menu
-install -p -m 644 %{name}.pdf $RPM_BUILD_ROOT%{_docdir}/%{name}
-ln -s ../doc/%{name} $RPM_BUILD_ROOT%{_datadir}/%{name}/doc
 
 # for use of the -data package with libsidplay bases sid players
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/sidplayfp
@@ -234,29 +230,42 @@ for i in basic chargen kernal; do
   ln -s ../vice/C64/$i $RPM_BUILD_ROOT%{_datadir}/sidplayfp/$i
 done
 
-# below is the desktop file and icon stuff.
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/appdata
+# Patch desktop files
+sed -i 's!Exec=/usr/bin/!Exec=!' \
+   src/arch/gtk3/data/unix/vice-org-*.desktop
+sed -i 's!Icon=/usr/share/vice/common/!Icon=!' \
+   src/arch/gtk3/data/unix/vice-org-*.desktop
+
+# Install desktop files
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/applications
+for i in src/arch/gtk3/data/unix/vice-org-*.desktop; do
+  desktop-file-install \
+    --add-category=Game \
+    --add-category=Emulator \
+    --dir $RPM_BUILD_ROOT%{_datadir}/applications \
+    $i
+done
+
+# Install icons
+for c in C128 C64 CBM2 DTV PET Plus4 SCPU SID VIC20; do
+  for i in 16 24 32 48 64 256 ; do
+    mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/${i}x${i}/apps
+    install -p -m 644 data/common/${c}_${i}.png \
+      %{buildroot}%{_datadir}/icons/hicolor/${i}x${i}/apps/${c}.png
+  mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps
+  install -p -m 0644 data/common/${c}_*.svg \
+    $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps/${c}.svg
+  done
+done
+
+# Install AppData files
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/appdata
 for i in x64 x128 xcbm-ii xpet xplus4 xvic; do
-  desktop-file-install --dir $RPM_BUILD_ROOT%{_datadir}/applications \
-    $RPM_SOURCE_DIR/$i.desktop
-  install -p -m 0644 $RPM_SOURCE_DIR/$i.*.xml $RPM_BUILD_ROOT%{_datadir}/appdata
+  install -p -m 0644 $RPM_SOURCE_DIR/$i.*.xml \
+    $RPM_BUILD_ROOT%{_datadir}/appdata
   appstream-util validate-relax --nonet \
     $RPM_BUILD_ROOT%{_datadir}/appdata/$i.*.xml
 done
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/16x16/apps
-cd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/16x16/apps
-tar xvfj %{SOURCE7}
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/32x32/apps
-cd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/32x32/apps
-tar xvfj %{SOURCE8}
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/48x48/apps
-cd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/48x48/apps
-tar xvfj %{SOURCE9}
-# remove "icon" from the icons name they are already in the icons dir.
-pushd $RPM_BUILD_ROOT%{_datadir}/icons/hicolor
-for i in */apps/*icon.png; do mv $i `echo $i|sed s/icon//`; done
-popd
 
 
 %files
@@ -268,40 +277,48 @@ popd
 %{_bindir}/cartconv
 %{_bindir}/petcat
 %{_bindir}/vsid
-%{_datadir}/icons/hicolor/*/apps/*.png
-%{_infodir}/%{name}.info*
-%{_mandir}/man1/*.1.gz
+%{_datadir}/applications/vice-org-vsid.desktop
+%{_datadir}/icons/hicolor/*/apps/SID.*
 
 %files x64
 %{_bindir}/x64*
 %{_bindir}/xscpu64*
 %{_datadir}/appdata/x64.appdata.xml
-%{_datadir}/applications/x64.desktop
+%{_datadir}/applications/vice-org-x64*.desktop
+%{_datadir}/applications/vice-org-xscpu64.desktop
+%{_datadir}/icons/hicolor/*/apps/C64.*
+%{_datadir}/icons/hicolor/*/apps/DTV.*
+%{_datadir}/icons/hicolor/*/apps/SCPU.*
 
 %files x128
 %{_bindir}/x128*
 %{_datadir}/appdata/x128.metainfo.xml
-%{_datadir}/applications/x128.desktop
+%{_datadir}/applications/vice-org-x128.desktop
+%{_datadir}/icons/hicolor/*/apps/C128.*
 
 %files xcbm-ii
 %{_bindir}/xcbm*
 %{_datadir}/appdata/xcbm-ii.metainfo.xml
-%{_datadir}/applications/xcbm-ii.desktop
+%{_datadir}/applications/vice-org-xcbm*.desktop
+%{_datadir}/icons/hicolor/*/apps/CBM2.*
 
 %files xpet
 %{_bindir}/xpet*
 %{_datadir}/appdata/xpet.metainfo.xml
-%{_datadir}/applications/xpet.desktop
+%{_datadir}/applications/vice-org-xpet.desktop
+%{_datadir}/icons/hicolor/*/apps/PET.*
 
 %files xplus4
 %{_bindir}/xplus4*
 %{_datadir}/appdata/xplus4.metainfo.xml
-%{_datadir}/applications/xplus4.desktop
+%{_datadir}/applications/vice-org-xplus4.desktop
+%{_datadir}/icons/hicolor/*/apps/Plus4.*
 
 %files xvic
 %{_bindir}/xvic*
 %{_datadir}/appdata/xvic.metainfo.xml
-%{_datadir}/applications/xvic.desktop
+%{_datadir}/applications/vice-org-xvic.desktop
+%{_datadir}/icons/hicolor/*/apps/VIC20.*
 
 %files data
 %{_datadir}/%{name}
@@ -309,6 +326,9 @@ popd
 
 
 %changelog
+* Mon Feb 14 2022 Andrea Musuruane <musuruan@gmail.com> - 3.6.1-1
+- New upstream release 3.6.1
+
 * Thu Feb 10 2022 RPM Fusion Release Engineering <sergiomb@rpmfusion.org> - 3.4-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
@@ -321,7 +341,7 @@ popd
 * Sat Aug 22 2020 Hans de Goede <j.w.r.degoede@gmail.com> - 3.4-1
 - New upstream release 3.4
 - Fix Fedora 33 FTBFS
-- Remove obsolete gtk-icon-cache and instlal-info scriptlets
+- Remove obsolete gtk-icon-cache and install-info scriptlets
 
 * Wed Aug 19 2020 RPM Fusion Release Engineering <leigh123linux@gmail.com> - 3.2-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
