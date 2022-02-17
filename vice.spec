@@ -2,7 +2,7 @@
 
 Name:           vice
 Version:        3.6.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -25,10 +25,13 @@ BuildRequires:  libXext-devel
 BuildRequires:  libXrandr-devel
 BuildRequires:  libGL-devel
 BuildRequires:  glew-devel
+BuildRequires:  giflib-devel
 BuildRequires:  libjpeg-devel
 BuildRequires:  libpng-devel
 # The video recording code does not work with the new ffmpeg in F36
-%if 0%{?fedora} < 36
+%if 0%{?fedora} >= 36
+BuildRequires:  compat-ffmpeg4-devel
+%else
 BuildRequires:  ffmpeg-devel
 %endif
 BuildRequires:  x264-devel
@@ -41,6 +44,7 @@ BuildRequires:  alsa-lib-devel
 BuildRequires:  pulseaudio-libs-devel
 BuildRequires:  libpcap-devel
 BuildRequires:  libieee1284-devel
+BuildRequires:  libcurl-devel
 BuildRequires:  pciutils-devel
 BuildRequires:  bison
 BuildRequires:  flex
@@ -173,15 +177,15 @@ sed -i "s/\([a-zA-Z0-9]*\)_[0-9]*\.svg/\1/" \
 
 # The video recording code does not work with the new ffmpeg in F36
 # https://sourceforge.net/p/vice-emu/bugs/1697/
-%if 0%{?fedora} >= 36
-COMMON_FLAGS="--enable-x64 --enable-ethernet --enable-libieee1284 --disable-arch --enable-lame --with-mpg123 --with-flac --with-vorbis --with-jpeg"
-%else
-COMMON_FLAGS="--enable-x64 --enable-ethernet --enable-libieee1284 --disable-arch --enable-external-ffmpeg --enable-lame --with-mpg123 --with-flac --with-vorbis --with-jpeg"
-%endif
+COMMON_FLAGS="--enable-x64 --enable-ethernet --enable-libieee1284 --disable-arch --enable-external-ffmpeg --enable-lame --with-mpg123 --with-flac --with-vorbis --with-jpeg --with-gif --with-libcurl"
 
 # Some of the code uses GNU / XOPEN libc extensions
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
 export CXXFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
+
+%if 0%{?fedora} >= 36
+export PKG_CONFIG_PATH=%{_libdir}/compat-ffmpeg4/pkgconfig
+%endif
 
 # Build SDL version
 %configure --enable-sdlui2 $COMMON_FLAGS
@@ -326,6 +330,10 @@ done
 
 
 %changelog
+* Thu Feb 17 2022 Hans de Goede <j.w.r.degoede@gmail.com> - 3.6.1-2
+- Renable ffmpeg recording support using compat-ffmpeg4
+- Enable GIF and libcurl support
+
 * Mon Feb 14 2022 Andrea Musuruane <musuruan@gmail.com> - 3.6.1-1
 - New upstream release 3.6.1
 
