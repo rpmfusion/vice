@@ -2,7 +2,7 @@
 
 Name:           vice
 Version:        3.6.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -330,6 +330,10 @@ done
 
 
 %changelog
+* Mon Aug 08 2022 RPM Fusion Release Engineering <sergiomb@rpmfusion.org> - 3.6.1-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild and ffmpeg
+  5.1
+
 * Thu Feb 17 2022 Hans de Goede <j.w.r.degoede@gmail.com> - 3.6.1-2
 - Renable ffmpeg recording support using compat-ffmpeg4
 - Enable GIF and libcurl support
