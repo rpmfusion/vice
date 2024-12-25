@@ -1,0 +1,12 @@
+diff -durN vice-3.9.orig/src/arch/gtk3/actions-help.c vice-3.9/src/arch/gtk3/actions-help.c
+--- vice-3.9.orig/src/arch/gtk3/actions-help.c	2024-12-24 20:12:44.000000000 +0100
++++ vice-3.9/src/arch/gtk3/actions-help.c	2024-12-25 11:50:31.580165198 +0100
+@@ -65,7 +65,7 @@
+      */
+     path = archdep_get_vice_docsdir();
+ 
+-    uri = util_join_paths(path, "vice.pdf", NULL);
++    uri = util_join_paths(path, "html/vice_toc.html", NULL);
+     debug_gtk3("URI before GTK3: %s", uri);
+     final_uri = g_filename_to_uri(uri, NULL, &error);
+     debug_gtk3("final URI (pdf): %s", final_uri);

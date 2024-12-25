@@ -1,8 +1,6 @@
-%define _legacy_common_support 1
-
 Name:           vice
-Version:        3.6.1
-Release:        7%{?dist}
+Version:        3.9
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -15,6 +13,8 @@ Source4:        xpet.metainfo.xml
 Source5:        xplus4.metainfo.xml
 Source6:        xvic.metainfo.xml
 Patch0:         vice-cflags-ldflags-mixup.patch
+# Open HTML docs in GTK3 version
+Patch1:         vice-gtk3-help.patch
 
 BuildRequires:  gcc-c++
 BuildRequires:  automake
@@ -26,14 +26,7 @@ BuildRequires:  libXrandr-devel
 BuildRequires:  libGL-devel
 BuildRequires:  glew-devel
 BuildRequires:  giflib-devel
-BuildRequires:  libjpeg-devel
 BuildRequires:  libpng-devel
-# The video recording code does not work with the new ffmpeg in F36
-%if 0%{?fedora} >= 36
-BuildRequires:  compat-ffmpeg4-devel
-%else
-BuildRequires:  ffmpeg-devel
-%endif
 BuildRequires:  x264-devel
 BuildRequires:  lame-devel
 BuildRequires:  flac-devel
@@ -46,11 +39,11 @@ BuildRequires:  libpcap-devel
 BuildRequires:  libieee1284-devel
 BuildRequires:  libcurl-devel
 BuildRequires:  pciutils-devel
+BuildRequires:  libevdev-devel
 BuildRequires:  bison
 BuildRequires:  flex
 BuildRequires:  perl
 BuildRequires:  gettext
-BuildRequires:  info
 BuildRequires:  texinfo
 BuildRequires:  texinfo-tex
 BuildRequires:  xa
@@ -175,20 +168,17 @@ sed -i "s/\([a-zA-Z0-9]*\)_[0-9]*\.svg/\1/" \
 # works around this, but this breaks LTO. So lets just disable LTO for now.
 %define _lto_cflags %{nil}
 
-# The video recording code does not work with the new ffmpeg in F36
-# https://sourceforge.net/p/vice-emu/bugs/1697/
-COMMON_FLAGS="--enable-x64 --enable-ethernet --enable-libieee1284 --disable-arch --enable-external-ffmpeg --enable-lame --with-mpg123 --with-flac --with-vorbis --with-jpeg --with-gif --with-libcurl"
+# The old FFMPEG support was deprecated and is disabled by default. New
+# experimental code was added that will work with external ffmpeg executable
+# instead.
+COMMON_FLAGS="--enable-x64 --enable-ethernet --disable-arch --enable-external-ffmpeg --enable-html-docs --with-libieee1284 --with-lame --with-mpg123 --with-flac --with-vorbis --with-gif --with-libcurl"
 
 # Some of the code uses GNU / XOPEN libc extensions
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
 export CXXFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE=1"
 
-%if 0%{?fedora} >= 36
-export PKG_CONFIG_PATH=%{_libdir}/compat-ffmpeg4/pkgconfig
-%endif
-
 # Build SDL version
-%configure --enable-sdlui2 $COMMON_FLAGS
+%configure --enable-sdl2ui $COMMON_FLAGS
 %make_build
 # Rename / save SDL binaries
 for i in src/x*; do
@@ -199,7 +189,7 @@ done
 make distclean
 
 # Build GTK version
-%configure --enable-native-gtk3ui --enable-desktop-files $COMMON_FLAGS
+%configure --enable-gtk3ui --enable-desktop-files $COMMON_FLAGS
 %make_build
 
 
@@ -216,23 +206,17 @@ pushd data
     cp -a --parents $i $RPM_BUILD_ROOT%{_datadir}/%{name}
   done
 popd
-# We cannot do this in %%prep because the autogen code for infocontrib.h expects
-# vice.texi to still be in ISO-8859-15
-FILE=$RPM_BUILD_ROOT%{_docdir}/%{name}/vice.texi
-iconv -f ISO-8859-15 -t UTF8 $FILE > $FILE.tmp
-touch -r $FILE $FILE.tmp
-mv $FILE.tmp $FILE
-
-# vice installs a bunch of docs under /usr/share/doc/vice which are not really
-# end user oriented. Remove these.
-rm $RPM_BUILD_ROOT%{_docdir}/%{name}/*.txt
-rm $RPM_BUILD_ROOT%{_docdir}/%{name}/GTK3-*.md
 
 # for use of the -data package with libsidplay bases sid players
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/sidplayfp
 for i in basic chargen kernal; do
   ln -s ../vice/C64/$i $RPM_BUILD_ROOT%{_datadir}/sidplayfp/$i
 done
+
+# Install HTML docs
+mkdir -p $RPM_BUILD_ROOT%{_pkgdocdir}/html
+cp -a doc/html/{fonts/,images/,vice_*.html,*.css} \
+  $RPM_BUILD_ROOT%{_pkgdocdir}/html
 
 # Patch desktop files
 sed -i 's!Exec=/usr/bin/!Exec=!' \
@@ -244,8 +228,6 @@ sed -i 's!Icon=/usr/share/vice/common/!Icon=!' \
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/applications
 for i in src/arch/gtk3/data/unix/vice-org-*.desktop; do
   desktop-file-install \
-    --add-category=Game \
-    --add-category=Emulator \
     --dir $RPM_BUILD_ROOT%{_datadir}/applications \
     $i
 done
@@ -257,7 +239,7 @@ for c in C128 C64 CBM2 DTV PET Plus4 SCPU SID VIC20; do
     install -p -m 644 data/common/${c}_${i}.png \
       %{buildroot}%{_datadir}/icons/hicolor/${i}x${i}/apps/${c}.png
   mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps
-  install -p -m 0644 data/common/${c}_*.svg \
+  install -p -m 0644 data/common/${c}_1024.svg \
     $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps/${c}.svg
   done
 done
@@ -275,7 +257,7 @@ done
 %files
 
 %files common
-%doc %{_docdir}/%{name}
+%doc %{_pkgdocdir}
 %license COPYING
 %{_bindir}/c1541
 %{_bindir}/cartconv
@@ -330,6 +312,9 @@ done
 
 
 %changelog
+* Wed Dec 25 2024 Andrea Musuruane <musuruan@gmail.com> - 3.9-1
+- New upstream release 3.9
+
 * Sat Aug 03 2024 RPM Fusion Release Engineering <sergiomb@rpmfusion.org> - 3.6.1-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
