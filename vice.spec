@@ -1,6 +1,6 @@
 Name:           vice
 Version:        3.9
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -312,6 +312,9 @@ done
 
 
 %changelog
+* Wed Jan 29 2025 RPM Fusion Release Engineering <sergiomb@rpmfusion.org> - 3.9-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_42_Mass_Rebuild
+
 * Wed Dec 25 2024 Andrea Musuruane <musuruan@gmail.com> - 3.9-1
 - New upstream release 3.9
 
