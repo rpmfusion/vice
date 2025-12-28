@@ -1,6 +1,6 @@
 Name:           vice
-Version:        3.9
-Release:        4%{?dist}
+Version:        3.10
+Release:        1%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -151,23 +151,11 @@ Vice Commodore VIC-20 Emulator.
 sed -i 's/\r//' `find -name "*.h"`
 sed -i 's/\r//' `find -name "*.c"`
 sed -i 's/\r//' `find -name "*.cc"`
+sed -i 's/\r//' doc/html/fonts/OFL.txt
 ./autogen.sh
-
-# Fix desktop file generation
-sed -i "s/\([a-zA-Z0-9]*\)_[0-9]*\.svg/\1/" \
-  src/arch/gtk3/data/unix/Makefile.am
 
 
 %build
-# The build fails with linking errors when enabling LTO.
-# The build fails because of the .a archives from ARCH_LIBS being passed on the
-# cmdline twice. Fixing this leads to errors about undefined symbols because
-# the various .a archives from ARCH_LIBS have interdependencies in 2 directions,
-# so there is no working order in which they can be passed which resolves all
-# symbols in one go. Passing ARCH_LIBS twice, as the upstream Makefile does
-# works around this, but this breaks LTO. So lets just disable LTO for now.
-%define _lto_cflags %{nil}
-
 # The old FFMPEG support was deprecated and is disabled by default. New
 # experimental code was added that will work with external ffmpeg executable
 # instead.
@@ -194,9 +182,12 @@ make distclean
 
 
 %install
-# Avoid the Makefiles .desktop file install as that installs them into
-# $HOME/.local/share/applications
-%make_install XDG_DESKTOP_MENU=/usr/bin/true
+%make_install
+
+# Fix icon premissions
+find $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/*/apps/*.png \
+   -exec chmod 644 {} \;
+
 # Manual install SDL version
 for i in src/x*.sdl; do
   install -p -m 755 $i $RPM_BUILD_ROOT%{_bindir}
@@ -218,32 +209,6 @@ mkdir -p $RPM_BUILD_ROOT%{_pkgdocdir}/html
 cp -a doc/html/{fonts/,images/,vice_*.html,*.css} \
   $RPM_BUILD_ROOT%{_pkgdocdir}/html
 
-# Patch desktop files
-sed -i 's!Exec=/usr/bin/!Exec=!' \
-   src/arch/gtk3/data/unix/vice-org-*.desktop
-sed -i 's!Icon=/usr/share/vice/common/!Icon=!' \
-   src/arch/gtk3/data/unix/vice-org-*.desktop
-
-# Install desktop files
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/applications
-for i in src/arch/gtk3/data/unix/vice-org-*.desktop; do
-  desktop-file-install \
-    --dir $RPM_BUILD_ROOT%{_datadir}/applications \
-    $i
-done
-
-# Install icons
-for c in C128 C64 CBM2 DTV PET Plus4 SCPU SID VIC20; do
-  for i in 16 24 32 48 64 256 ; do
-    mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/${i}x${i}/apps
-    install -p -m 644 data/common/${c}_${i}.png \
-      %{buildroot}%{_datadir}/icons/hicolor/${i}x${i}/apps/${c}.png
-  mkdir -p $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps
-  install -p -m 0644 data/common/${c}_1024.svg \
-    $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps/${c}.svg
-  done
-done
-
 # Install AppData files
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/appdata
 for i in x64 x128 xcbm-ii xpet xplus4 xvic; do
@@ -263,48 +228,48 @@ done
 %{_bindir}/cartconv
 %{_bindir}/petcat
 %{_bindir}/vsid
-%{_datadir}/applications/vice-org-vsid.desktop
-%{_datadir}/icons/hicolor/*/apps/SID.*
+%{_datadir}/applications/vsid.desktop
+%{_datadir}/icons/hicolor/*/apps/vice-vsid.*
 
 %files x64
 %{_bindir}/x64*
 %{_bindir}/xscpu64*
 %{_datadir}/appdata/x64.appdata.xml
-%{_datadir}/applications/vice-org-x64*.desktop
-%{_datadir}/applications/vice-org-xscpu64.desktop
-%{_datadir}/icons/hicolor/*/apps/C64.*
-%{_datadir}/icons/hicolor/*/apps/DTV.*
-%{_datadir}/icons/hicolor/*/apps/SCPU.*
+%{_datadir}/applications/x64*.desktop
+%{_datadir}/applications/xscpu64.desktop
+%{_datadir}/icons/hicolor/*/apps/vice-x64.*
+%{_datadir}/icons/hicolor/*/apps/vice-x64dtv.*
+%{_datadir}/icons/hicolor/*/apps/vice-xscpu64.*
 
 %files x128
 %{_bindir}/x128*
 %{_datadir}/appdata/x128.metainfo.xml
-%{_datadir}/applications/vice-org-x128.desktop
-%{_datadir}/icons/hicolor/*/apps/C128.*
+%{_datadir}/applications/x128.desktop
+%{_datadir}/icons/hicolor/*/apps/vice-x128.*
 
 %files xcbm-ii
 %{_bindir}/xcbm*
 %{_datadir}/appdata/xcbm-ii.metainfo.xml
-%{_datadir}/applications/vice-org-xcbm*.desktop
-%{_datadir}/icons/hicolor/*/apps/CBM2.*
+%{_datadir}/applications/xcbm*.desktop
+%{_datadir}/icons/hicolor/*/apps/vice-xcbm2.*
 
 %files xpet
 %{_bindir}/xpet*
 %{_datadir}/appdata/xpet.metainfo.xml
-%{_datadir}/applications/vice-org-xpet.desktop
-%{_datadir}/icons/hicolor/*/apps/PET.*
+%{_datadir}/applications/xpet.desktop
+%{_datadir}/icons/hicolor/*/apps/vice-xpet.*
 
 %files xplus4
 %{_bindir}/xplus4*
 %{_datadir}/appdata/xplus4.metainfo.xml
-%{_datadir}/applications/vice-org-xplus4.desktop
-%{_datadir}/icons/hicolor/*/apps/Plus4.*
+%{_datadir}/applications/xplus4.desktop
+%{_datadir}/icons/hicolor/*/apps/vice-xplus4.*
 
 %files xvic
 %{_bindir}/xvic*
 %{_datadir}/appdata/xvic.metainfo.xml
-%{_datadir}/applications/vice-org-xvic.desktop
-%{_datadir}/icons/hicolor/*/apps/VIC20.*
+%{_datadir}/applications/xvic.desktop
+%{_datadir}/icons/hicolor/*/apps/vice-xvic.*
 
 %files data
 %{_datadir}/%{name}
@@ -312,6 +277,9 @@ done
 
 
 %changelog
+* Wed Dec 24 2025 Andrea Musuruane <musuruan@gmail.com> - 3.10-1
+- New upstream release 3.10
+
 * Mon Jul 28 2025 RPM Fusion Release Engineering <sergiomb@rpmfusion.org> - 3.9-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_43_Mass_Rebuild
 
