@@ -1,6 +1,6 @@
 Name:           vice
 Version:        3.10
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -15,6 +15,9 @@ Source6:        xvic.metainfo.xml
 Patch0:         vice-cflags-ldflags-mixup.patch
 # Open HTML docs in GTK3 version
 Patch1:         vice-gtk3-help.patch
+# Fix bug 2186 - list only one of several controllers of the exact same type
+# Backported from r45930
+Patch2:         vice-joysticks.patch
 
 BuildRequires:  gcc-c++
 BuildRequires:  automake
@@ -277,6 +280,9 @@ done
 
 
 %changelog
+* Wed Dec 31 2025 Andrea Musuruane <musuruan@gmail.com> - 3.10-2
+- Fix upstream bug 2186
+
 * Wed Dec 24 2025 Andrea Musuruane <musuruan@gmail.com> - 3.10-1
 - New upstream release 3.10
 
