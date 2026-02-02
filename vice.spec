@@ -1,6 +1,6 @@
 Name:           vice
 Version:        3.10
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Emulator for a variety of Commodore 8bit machines
 Group:          Applications/Emulators
 License:        GPLv2+
@@ -280,6 +280,9 @@ done
 
 
 %changelog
+* Mon Feb 02 2026 RPM Fusion Release Engineering <sergiomb@rpmfusion.org> - 3.10-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_44_Mass_Rebuild
+
 * Wed Dec 31 2025 Andrea Musuruane <musuruan@gmail.com> - 3.10-2
 - Fix upstream bug 2186
 
